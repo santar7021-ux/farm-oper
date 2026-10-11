@@ -106,6 +106,10 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
 .ocr-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0}
 .ocr-row:last-child{border:none}
 .ocr-label{color:var(--tl);font-weight:600;min-width:70px}.ocr-val{color:var(--tx);text-align:right;word-break:break-all}
+.btn-sync{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.btn-sync:active{background:rgba(255,255,255,.35)}
+.btn-sync.spinning{animation:spin .8s linear infinite}
+.sheet-ok{background:var(--pl);color:var(--pd)}.sheet-no{background:#fef3e2;color:#e67e22}
 .btn-set{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;transition:background .15s}
 .btn-set:active{background:rgba(255,255,255,.35)}
 .key-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:15px;font-weight:600}
@@ -117,7 +121,7 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
 </style>
 </head>
 <body>
-<div class="hd"><h1><span>🍐</span> 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
+<div class="hd"><h1><span>🍐</span> 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none">🔄</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
 <div class="st" id="stats"></div>
 <div class="ls">
   <div class="lh"><label><input type="checkbox" id="selAll" onchange="togAll()"> 전체 선택</label>
@@ -174,7 +178,7 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
 <div class="mo" id="mEm"><div class="ml" style="max-width:440px"><div class="mh"><h2>📦 택배 전달</h2><button class="bc" onclick="cm('mEm')">✕</button></div><div class="mb">
   <p style="margin-bottom:14px;color:var(--tl);font-size:15px">선택한 주문 <strong id="eCnt">0</strong>건을 메일로 전달합니다.</p>
   <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><strong>광진</strong><br><span style="font-size:14px;color:var(--tl)">gwang-jin@naver.com</span></div></label>
-  <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><strong>영진</strong><br><span style="font-size:14px;color:var(--tl)">santar7021@naver.com</span></div></label>
+  <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><strong>명진</strong><br><span style="font-size:14px;color:var(--tl)">santar7021@gmail.com</span></div></label>
 </div><div class="mf"><button class="bp" onclick="doEm()">✉️ 메일 보내기</button></div></div></div>
 
 <!-- 카메라 -->
@@ -236,12 +240,24 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
       </div>
     </div>
     <div class="fc">
-      <h3>📦 데이터 관리</h3>
-      <p style="font-size:14px;color:var(--tl);margin-bottom:12px">주문 데이터는 이 브라우저에 저장됩니다. 다른 기기로 옮기려면 내보내기/가져오기를 사용하세요.</p>
-      <div class="ag" style="gap:10px">
-        <button class="bp" style="background:var(--in)" onclick="exportData()">📤 내보내기</button>
-        <button class="bp" style="background:var(--ac)" onclick="document.getElementById('importFile').click()">📥 가져오기</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <h3>📊 구글 스프레드시트 연동</h3>
+      <div id="sheetStatus"></div>
+      <p style="font-size:14px;color:var(--tl);margin-bottom:12px;line-height:1.5">
+        구글 스프레드시트에 주문 데이터를 저장하면 여러 기기에서 동일한 데이터를 공유할 수 있습니다.
+      </p>
+      <div class="fr">
+        <label>Apps Script 웹앱 URL</label>
+        <input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/..." style="font-size:14px">
+      </div>
+      <div class="ag" style="gap:10px;margin-top:4px">
+        <button class="bp" onclick="saveSheetUrl()">💾 저장</button>
+        <button class="bp" style="background:var(--dg)" onclick="clearSheetUrl()">🗑️ 해제</button>
+      </div>
+      <div id="sheetActions" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
+        <div class="ag" style="gap:10px">
+          <button class="bp" style="background:var(--in)" onclick="syncFromSheet()">📥 스프레드시트에서 불러오기</button>
+          <button class="bp" style="background:var(--ac)" onclick="syncToSheet()">📤 스프레드시트로 보내기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -265,7 +281,7 @@ const A={
 '제주':{'제주시':['구좌읍','노형동','도두동','삼도동','삼양동','아라동','애월읍','연동','용담동','우도면','이도동','이호동','일도동','조천읍','한경면','한림읍','화북동','오라동'],'서귀포시':['남원읍','대정읍','대포동','동홍동','법환동','서귀동','서호동','성산읍','안덕면','영남동','예래동','중문동','토평동','표선면','호근동']}
 };
 
-const EM=['gwang-jin@naver.com','santar7021@naver.com'],EN=['광진','영진'];
+const EM=['gwang-jin@naver.com','santar7021@gmail.com'],EN=['광진','명진'];
 let O=[],CK=new Set(),CF='all',EI=null,SE=null,openGrps=new Set();
 
 function ld(){try{O=JSON.parse(localStorage.getItem('po3'))||[]}catch(e){O=[]}}
@@ -394,7 +410,7 @@ function togGrpCk(k,checked){
   render();
 }
 
-function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;o.st=o.st==='접수'?'접수완료':'접수';sv();render();toast(`상태: "${o.st}"`)}
+function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;o.st=o.st==='접수'?'접수완료':'접수';sv();render();sheetUpdate(o);toast(`상태: "${o.st}"`)}
 function tCk(id){CK.has(id)?CK.delete(id):CK.add(id);render()}
 function togAll(){const a=document.getElementById('selAll').checked;const f=CF==='all'?O:O.filter(o=>o.st===CF);a?f.forEach(o=>CK.add(o.id)):CK.clear();render();document.getElementById('selAll').checked=a}
 function uBB(){const b=document.getElementById('bbar'),c=CK.size;c>0?(b.classList.remove('hid'),document.getElementById('cCnt').textContent=c):b.classList.add('hid')}
@@ -436,12 +452,12 @@ function saveO(){
   if(!rn)return toast('받는 분 성명 입력');if(!rp)return toast('받는 분 연락처 입력');if(!rd)return toast('받는 분 주소(도) 선택');
   const dt={cat:curCat,va,qt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
     r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
-  if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1)Object.assign(O[i],dt);toast('수정 완료')}
-  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);toast('등록 완료')}
+  if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1){Object.assign(O[i],dt);sheetUpdate(O[i])}toast('수정 완료')}
+  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
   sv();render();cm('mForm');EI=null;
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
-function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();toast('삭제 완료')}
+function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
 
 function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
@@ -586,28 +602,71 @@ function updateKeyStatus(){
   if(k){el.innerHTML=`<div class="key-status key-ok">✅ API 키가 설정되어 있습니다 (${k.slice(0,12)}...)</div>`}
   else{el.innerHTML=`<div class="key-status key-no">⚠️ API 키가 설정되지 않았습니다</div>`}
 }
-// 데이터 내보내기/가져오기
-function exportData(){
-  const d=JSON.stringify(O,null,2);
-  const blob=new Blob([d],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;
-  a.download='pear-orders-'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();URL.revokeObjectURL(url);toast('주문 데이터를 내보냈습니다');
+// ===== 구글 스프레드시트 연동 =====
+function getSheetUrl(){try{return localStorage.getItem('pearSheetUrl')||''}catch(e){return ''}}
+function saveSheetUrl(){
+  const u=document.getElementById('sheetUrlInput').value.trim();
+  if(!u)return toast('URL을 입력해주세요');
+  try{localStorage.setItem('pearSheetUrl',u)}catch(e){}
+  document.getElementById('sheetUrlInput').value='';
+  updateSheetStatus();toast('스프레드시트 URL이 저장되었습니다');
+  syncFromSheet();
 }
-function importData(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=ev=>{
-    try{const d=JSON.parse(ev.target.result);
-      if(!Array.isArray(d))throw new Error();
-      if(!confirm(`${d.length}건의 주문을 가져옵니다. 기존 데이터에 추가됩니다.`))return;
-      d.forEach(o=>{if(!O.find(x=>x.id===o.id))O.push(o)});
-      sv();render();toast(`${d.length}건 가져오기 완료`);
-    }catch(err){toast('파일 형식이 올바르지 않습니다')}
-  };r.readAsText(f);e.target.value='';
+function clearSheetUrl(){
+  if(!confirm('스프레드시트 연동을 해제하시겠습니까?'))return;
+  try{localStorage.removeItem('pearSheetUrl')}catch(e){}
+  updateSheetStatus();toast('연동이 해제되었습니다');
+}
+function updateSheetStatus(){
+  const u=getSheetUrl();
+  const el=document.getElementById('sheetStatus');
+  const acts=document.getElementById('sheetActions');
+  const btn=document.getElementById('btnSync');
+  if(u){
+    el.innerHTML=`<div class="key-status sheet-ok">✅ 스프레드시트가 연결되어 있습니다</div>`;
+    acts.style.display='';btn.style.display='flex';
+  }else{
+    el.innerHTML=`<div class="key-status sheet-no">⚠️ 스프레드시트가 연결되지 않았습니다</div>`;
+    acts.style.display='none';btn.style.display='none';
+  }
+}
+async function syncFromSheet(){
+  const u=getSheetUrl();if(!u)return;
+  const btn=document.getElementById('btnSync');
+  btn.classList.add('spinning');
+  try{
+    const r=await fetch(u);const data=await r.json();
+    if(Array.isArray(data)){O=data;sv();render();toast(`스프레드시트에서 ${data.length}건 불러옴`)}
+    else if(data.error){toast('오류: '+data.error)}
+  }catch(err){console.error(err);toast('스프레드시트 연결 실패')}
+  btn.classList.remove('spinning');
+}
+async function syncToSheet(){
+  const u=getSheetUrl();if(!u)return;
+  if(!confirm(`현재 ${O.length}건의 주문을 스프레드시트로 보냅니다.\n스프레드시트의 기존 데이터가 교체됩니다.`))return;
+  try{
+    const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'sync',orders:O})});
+    const data=await r.json();
+    if(data.ok)toast(`${data.count}건 스프레드시트에 저장 완료`);
+    else toast('오류: '+(data.error||'알 수 없음'));
+  }catch(err){console.error(err);toast('스프레드시트 연결 실패')}
+}
+async function sheetAdd(order){
+  const u=getSheetUrl();if(!u)return;
+  try{await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'add',order})})}catch(e){}
+}
+async function sheetUpdate(order){
+  const u=getSheetUrl();if(!u)return;
+  try{await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'update',order})})}catch(e){}
+}
+async function sheetDelete(id){
+  const u=getSheetUrl();if(!u)return;
+  try{await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',id})})}catch(e){}
 }
 
-initA();ld();render();updateKeyStatus();
+initA();ld();render();updateKeyStatus();updateSheetStatus();
+// 스프레드시트 연결 시 자동 불러오기
+if(getSheetUrl())syncFromSheet();
 </script>
 </body>
 </html>
