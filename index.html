@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>배 농장 주문 관리</title>
+<style>
+:root{--bg:#f5f3ef;--sf:#fff;--pr:#5a7a3a;--pl:#e8f0df;--pd:#3d5427;--ac:#c8a951;--tx:#2c2c2c;--tl:#6b6b6b;--bd:#ddd;--dg:#c0392b;--dl:#fdeaea;--in:#2980b9;--il:#eaf2f8;--rd:12px;--sh:0 2px 8px rgba(0,0,0,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--sf:#2a2a2a;--tx:#e8e8e8;--tl:#aaa;--bd:#444;--pl:#2d3a22;--dl:#3a1a1a;--il:#1a2a3a;--sh:0 2px 8px rgba(0,0,0,.3)}}
+:root[data-theme="dark"]{--bg:#1a1a1a;--sf:#2a2a2a;--tx:#e8e8e8;--tl:#aaa;--bd:#444;--pl:#2d3a22;--dl:#3a1a1a;--il:#1a2a3a}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-padding-top:env(safe-area-inset-top,0)}html,body{height:100%}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;background:var(--bg);color:var(--tx);font-size:17px;line-height:1.6}
+button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,select,textarea{font-family:inherit;font-size:17px}
+
+.hd{background:var(--pr);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:env(safe-area-inset-top,0);z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hd h1{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}.hd h1 span{font-size:28px}
+.bn{background:#fff;color:var(--pd);padding:10px 20px;border-radius:8px;font-weight:700;font-size:16px;display:flex;align-items:center;gap:6px;transition:transform .1s}.bn:active{transform:scale(.96)}
+
+/* 통계 */
+.st{display:flex;gap:10px;padding:14px 20px;overflow-x:auto}
+.sc{background:var(--sf);border-radius:var(--rd);padding:14px 18px;min-width:100px;box-shadow:var(--sh);text-align:center;flex-shrink:0}
+.sc .n{font-size:28px;font-weight:800;color:var(--pr)}.sc .l{font-size:14px;color:var(--tl);margin-top:2px}
+
+/* 필터 & 리스트 */
+.ls{padding:0 16px 100px}
+.lh{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;position:sticky;top:62px;background:var(--bg);z-index:50}
+.lh label{font-size:15px;color:var(--tl);display:flex;align-items:center;gap:6px}.lh label input{width:20px;height:20px;accent-color:var(--pr)}
+.fb{display:flex;gap:6px}.ft{padding:6px 14px;border-radius:20px;font-size:14px;font-weight:600;background:var(--sf);color:var(--tl);border:1px solid var(--bd)}
+.ft.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+
+/* 그룹 카드 (보내는 사람 기준) */
+.grp{background:var(--sf);border-radius:var(--rd);margin-bottom:12px;box-shadow:var(--sh);overflow:hidden}
+.grp.ck{outline:2px solid var(--pr)}
+.grp-hd{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;user-select:none;transition:background .15s}
+.grp-hd:active{background:var(--pl)}
+.grp-hd input[type=checkbox]{width:22px;height:22px;accent-color:var(--pr);flex-shrink:0}
+.grp-info{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.grp-sender{font-weight:700;font-size:17px;color:var(--tx)}
+.grp-phone{font-size:14px;color:var(--tl);font-weight:500}
+.grp-date{font-size:13px;color:var(--tl);font-weight:400;margin-left:4px}
+.grp-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.grp-cnt{background:var(--pr);color:#fff;padding:3px 12px;border-radius:16px;font-size:14px;font-weight:700}
+.grp-badges{display:flex;gap:4px}
+.badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.b접수{background:var(--il);color:var(--in)}.b접수완료{background:var(--pl);color:var(--pd)}
+.grp-arrow{font-size:14px;color:var(--tl);transition:transform .2s;flex-shrink:0}
+.grp-arrow.open{transform:rotate(180deg)}
+
+/* 펼친 주문 상세 */
+.grp-body{display:none;border-top:1px solid var(--bd)}
+.grp-body.open{display:block}
+.sub-order{padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px}
+.sub-order:last-child{border-bottom:none}
+.sub-order input[type=checkbox]{width:20px;height:20px;accent-color:var(--pr);flex-shrink:0}
+.sub-info{flex:1;min-width:0}
+.sub-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.sub-id{font-weight:700;color:var(--pd);font-size:14px}
+.sub-date{font-size:12px;color:var(--tl)}
+.sub-det{font-size:15px;margin-bottom:4px}
+.sub-det .tg{display:inline-block;background:var(--ac);color:#fff;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:600;margin-right:4px}
+.sub-recv{font-size:13px;color:var(--tl)}
+.sub-recv strong{color:var(--tx)}
+.sub-addr{font-size:12px;color:var(--tl);margin-top:2px}
+.sub-note{font-size:12px;color:var(--ac);margin-top:2px}
+.sub-acts{display:flex;gap:6px;margin-top:8px}
+.bs{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.be{background:var(--il);color:var(--in)}.bd{background:var(--dl);color:var(--dg)}.bst{background:var(--pl);color:var(--pd)}
+
+.es{text-align:center;padding:60px 20px;color:var(--tl)}.es .ic{font-size:48px;margin-bottom:12px}.es p{font-size:17px}
+
+/* 하단 바 */
+.bb{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bd);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0));display:flex;gap:10px;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.bb.hid{display:none}
+.bsp{flex:1;background:var(--pr);color:#fff;padding:14px;border-radius:10px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.cc{background:#fff;color:var(--pd);width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+
+/* 모달 */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.mo.show{opacity:1;pointer-events:auto}
+.ml{background:var(--bg);width:100%;max-width:640px;max-height:92vh;border-radius:20px 20px 0 0;overflow-y:auto;transform:translateY(100%);transition:transform .3s ease}
+.mo.show .ml{transform:translateY(0)}
+@media(min-width:768px){.mo{align-items:center}.ml{border-radius:20px;max-height:88vh}}
+.mh{position:sticky;top:0;background:var(--bg);padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd);z-index:10}
+.mh h2{font-size:20px;font-weight:700}
+.bc{width:36px;height:36px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--tx)}
+.mb{padding:20px}.mf{position:sticky;bottom:0;background:var(--bg);padding:16px 20px;border-top:1px solid var(--bd)}
+.fc{background:var(--sf);border-radius:var(--rd);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.fc h3{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--pd);border-bottom:2px solid var(--pl);padding-bottom:8px}
+.fr{margin-bottom:12px}.fr label{display:block;font-size:14px;font-weight:600;color:var(--tl);margin-bottom:4px}.fr .rq{color:var(--dg)}
+.fr input,.fr select,.fr textarea{width:100%;padding:12px 14px;border:1.5px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx);outline:none;transition:border-color .2s}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--pr)}
+.fr select:disabled{opacity:.45;background:#eee}.fr textarea{resize:vertical;min-height:60px}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:480px){.ag{grid-template-columns:1fr}}
+.ag3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}@media(max-width:580px){.ag3{grid-template-columns:1fr}}
+.bp{width:100%;padding:16px;background:var(--pr);color:#fff;border-radius:10px;font-size:18px;font-weight:700}.bp:active{background:var(--pd)}
+.cl{display:flex;flex-direction:column;gap:10px}
+.ci{background:var(--sf);border:2px solid var(--bd);border-radius:var(--rd);padding:18px;text-align:center;font-size:17px;font-weight:600;transition:all .15s}
+.ci:active,.ci:hover{border-color:var(--pr);background:var(--pl)}.ci .ds{font-size:14px;color:var(--tl);font-weight:400;margin-top:4px}
+.eo{background:var(--sf);border:2px solid var(--bd);border-radius:var(--rd);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;font-size:16px;cursor:pointer}
+.eo.sel{border-color:var(--pr);background:var(--pl)}.eo input[type=radio]{width:22px;height:22px;accent-color:var(--pr)}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:#fff;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.addr-hint{font-size:12px;color:var(--pr);margin-top:4px;font-weight:500}
+.ocr-spinner{width:40px;height:40px;border:4px solid var(--bd);border-top-color:var(--pr);border-radius:50%;margin:0 auto;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ocr-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0}
+.ocr-row:last-child{border:none}
+.ocr-label{color:var(--tl);font-weight:600;min-width:70px}.ocr-val{color:var(--tx);text-align:right;word-break:break-all}
+.btn-set{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.btn-set:active{background:rgba(255,255,255,.35)}
+.key-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:15px;font-weight:600}
+.key-ok{background:var(--pl);color:var(--pd)}.key-no{background:var(--dl);color:var(--dg)}
+.cat-tabs{display:flex;gap:8px}
+.cat-tab{flex:1;padding:14px 10px;border-radius:10px;font-size:17px;font-weight:700;background:var(--sf);color:var(--tl);border:2px solid var(--bd);text-align:center;transition:all .15s}
+.cat-tab:active{transform:scale(.97)}
+.cat-tab.on{border-color:var(--pr);background:var(--pl);color:var(--pd)}
+</style>
+</head>
+<body>
+<div class="hd"><h1><span>🍐</span> 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
+<div class="st" id="stats"></div>
+<div class="ls">
+  <div class="lh"><label><input type="checkbox" id="selAll" onchange="togAll()"> 전체 선택</label>
+    <div class="fb"><button class="ft on" onclick="filt('all',this)">전체</button><button class="ft" onclick="filt('접수',this)">접수</button><button class="ft" onclick="filt('접수완료',this)">접수완료</button></div>
+  </div>
+  <div id="olist"></div>
+</div>
+<div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()">📦 택배 전달 <span class="cc" id="cCnt">0</span></button></div>
+
+<!-- 접수 방식 선택 -->
+<div class="mo" id="mCh"><div class="ml" style="max-width:440px"><div class="mh"><h2>접수 방식 선택</h2><button class="bc" onclick="cm('mCh')">✕</button></div><div class="mb"><div class="cl">
+  <button class="ci" onclick="cm('mCh');openForm()">📝 주문서 신규 작성<div class="ds">직접 정보를 입력합니다</div></button>
+  <button class="ci" onclick="cm('mCh');openCam()">📷 촬영 후 주문 작성<div class="ds">사진 촬영 후 정보를 입력합니다</div></button>
+</div></div></div></div>
+
+<!-- 주문서 폼 -->
+<div class="mo" id="mForm"><div class="ml">
+  <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')">✕</button></div>
+  <div class="mb">
+    <div class="fc"><h3>🍐 주문 정보</h3>
+      <div class="fr"><label>상품 구분 <span class="rq">*</span></label>
+        <div class="cat-tabs" id="catTabs">
+          <button type="button" class="cat-tab" data-cat="배" onclick="pickCat('배')">🍐 배</button>
+          <button type="button" class="cat-tab" data-cat="배즙" onclick="pickCat('배즙')">🧃 배즙</button>
+        </div>
+      </div>
+      <div class="ag">
+        <div class="fr" id="fVWrap"><label>품종 <span class="rq">*</span></label><select id="fV" onchange="customSel(this,'품종 이름을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
+        <div class="fr"><label id="fQLabel">수량 <span class="rq">*</span></label><select id="fQ" onchange="customSel(this,'수량을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
+      </div>
+    </div>
+    <div class="fc"><h3>📤 보내는 사람</h3>
+      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="fr"><label>주소</label>
+        <div class="ag3" style="margin-bottom:8px"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
+        <div class="addr-hint" id="sHint"></div>
+        <input id="sA" placeholder="상세주소 직접 입력" style="margin-top:6px">
+      </div>
+    </div>
+    <div class="fc"><h3>📥 받는 사람</h3>
+      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="fr"><label>주소 <span class="rq">*</span></label>
+        <div class="ag3" style="margin-bottom:8px"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
+        <div class="addr-hint" id="rHint"></div>
+        <input id="rA" placeholder="상세주소 직접 입력" style="margin-top:6px">
+      </div>
+      <div class="fr"><label>비고</label><textarea id="rNo" placeholder="배송 메모"></textarea></div>
+    </div>
+  </div>
+  <div class="mf"><button class="bp" onclick="saveO()">💾 저장하기</button></div>
+</div></div>
+
+<!-- 이메일 -->
+<div class="mo" id="mEm"><div class="ml" style="max-width:440px"><div class="mh"><h2>📦 택배 전달</h2><button class="bc" onclick="cm('mEm')">✕</button></div><div class="mb">
+  <p style="margin-bottom:14px;color:var(--tl);font-size:15px">선택한 주문 <strong id="eCnt">0</strong>건을 메일로 전달합니다.</p>
+  <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><strong>광진</strong><br><span style="font-size:14px;color:var(--tl)">gwang-jin@naver.com</span></div></label>
+  <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><strong>영진</strong><br><span style="font-size:14px;color:var(--tl)">santar7021@naver.com</span></div></label>
+</div><div class="mf"><button class="bp" onclick="doEm()">✉️ 메일 보내기</button></div></div></div>
+
+<!-- 카메라 -->
+<div class="mo" id="mCam"><div class="ml" style="max-width:480px">
+  <div class="mh"><h2>📷 촬영 후 주문 작성</h2><button class="bc" onclick="cm('mCam')">✕</button></div>
+  <div class="mb">
+    <!-- 1단계: 촬영/갤러리 선택 -->
+    <div id="camStep1">
+      <p style="margin-bottom:14px;color:var(--tl);font-size:15px;text-align:center">주문서 사진을 선택하면 정보를 자동으로 인식합니다.</p>
+      <input type="file" accept="image/*" capture="environment" id="camInPhoto" style="display:none" onchange="camSelected(event)">
+      <input type="file" accept="image/*" id="camInGallery" style="display:none" onchange="camSelected(event)">
+      <div class="cl">
+        <button class="ci" onclick="document.getElementById('camInPhoto').click()">📷 사진 촬영<div class="ds">카메라로 주문서를 직접 촬영합니다</div></button>
+        <button class="ci" onclick="document.getElementById('camInGallery').click()">🖼️ 갤러리에서 선택<div class="ds">저장된 사진에서 주문서를 선택합니다</div></button>
+      </div>
+    </div>
+    <!-- 2단계: 미리보기 + 인식 -->
+    <div id="camStep2" style="display:none">
+      <div style="border-radius:12px;overflow:hidden;border:2px solid var(--bd);margin-bottom:16px">
+        <img id="camImg" style="width:100%;display:block">
+      </div>
+      <div id="ocrStatus" style="display:none;text-align:center;padding:20px">
+        <div class="ocr-spinner"></div>
+        <p style="margin-top:12px;font-size:16px;font-weight:600;color:var(--pr)">주문 정보를 인식하고 있습니다...</p>
+        <p style="font-size:13px;color:var(--tl);margin-top:4px">잠시만 기다려주세요</p>
+      </div>
+      <div id="ocrResult" style="display:none">
+        <div class="fc" style="margin-bottom:12px">
+          <h3 style="font-size:15px;border:none;padding:0;margin-bottom:10px">📋 인식된 정보</h3>
+          <div id="ocrPreview" style="font-size:14px;line-height:1.8"></div>
+        </div>
+      </div>
+      <div class="ag" style="gap:10px">
+        <button class="bp" style="background:var(--bd);color:var(--tx)" onclick="camReset()">↩ 다시 선택</button>
+        <button class="bp" id="btnOcrApply" onclick="applyOcr()">✅ 주문서에 적용</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- 설정 -->
+<div class="mo" id="mSet"><div class="ml" style="max-width:480px">
+  <div class="mh"><h2>⚙️ 설정</h2><button class="bc" onclick="cm('mSet')">✕</button></div>
+  <div class="mb">
+    <div class="fc">
+      <h3>🔑 API 키 설정</h3>
+      <div id="keyStatus"></div>
+      <p style="font-size:14px;color:var(--tl);margin-bottom:12px;line-height:1.5">
+        HTML 파일을 독립 실행할 때 사진 인식(OCR) 기능을 사용하려면 Anthropic API 키가 필요합니다.
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--in)">API 키 발급 →</a>
+      </p>
+      <div class="fr">
+        <label>API Key</label>
+        <input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." style="font-size:15px;letter-spacing:1px">
+      </div>
+      <div class="ag" style="gap:10px;margin-top:4px">
+        <button class="bp" onclick="saveApiKey()">💾 저장</button>
+        <button class="bp" style="background:var(--dg)" onclick="clearApiKey()">🗑️ 삭제</button>
+      </div>
+    </div>
+    <div class="fc">
+      <h3>📦 데이터 관리</h3>
+      <p style="font-size:14px;color:var(--tl);margin-bottom:12px">주문 데이터는 이 브라우저에 저장됩니다. 다른 기기로 옮기려면 내보내기/가져오기를 사용하세요.</p>
+      <div class="ag" style="gap:10px">
+        <button class="bp" style="background:var(--in)" onclick="exportData()">📤 내보내기</button>
+        <button class="bp" style="background:var(--ac)" onclick="document.getElementById('importFile').click()">📥 가져오기</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 주소 데이터 =====
+const A={
+'서울':{'강남구':['개포동','논현동','대치동','도곡동','삼성동','세곡동','수서동','신사동','압구정동','역삼동','율현동','일원동','자곡동','청담동'],'강동구':['강일동','고덕동','길동','둔촌동','명일동','상일동','성내동','암사동','천호동'],'강북구':['미아동','번동','수유동','우이동'],'강서구':['가양동','개화동','공항동','등촌동','마곡동','방화동','염창동','화곡동'],'관악구':['남현동','봉천동','신림동'],'광진구':['광장동','구의동','군자동','능동','자양동','중곡동','화양동'],'구로구':['가리봉동','개봉동','고척동','구로동','오류동','온수동','천왕동','항동'],'금천구':['가산동','독산동','시흥동'],'노원구':['공릉동','상계동','월계동','중계동','하계동'],'도봉구':['도봉동','방학동','쌍문동','창동'],'동대문구':['답십리동','신설동','용두동','이문동','장안동','전농동','제기동','청량리동','회기동','휘경동'],'동작구':['노량진동','대방동','동작동','사당동','상도동','신대방동','흑석동'],'마포구':['공덕동','동교동','마포동','망원동','상수동','상암동','서교동','성산동','아현동','연남동','용강동','합정동'],'서대문구':['남가좌동','북가좌동','북아현동','신촌동','연희동','홍은동','홍제동'],'서초구':['반포동','방배동','서초동','양재동','우면동','잠원동','내곡동'],'성동구':['금호동','마장동','성수동','송정동','옥수동','용답동','응봉동','행당동'],'성북구':['길음동','돈암동','보문동','석관동','성북동','안암동','월곡동','장위동','정릉동','종암동'],'송파구':['가락동','거여동','마천동','문정동','방이동','삼전동','석촌동','송파동','신천동','오금동','잠실동','장지동','풍납동'],'양천구':['목동','신월동','신정동'],'영등포구':['당산동','대림동','도림동','문래동','신길동','양평동','여의도동','영등포동'],'용산구':['남영동','보광동','용문동','용산동','이촌동','이태원동','청파동','한남동','효창동','후암동'],'은평구':['갈현동','구산동','녹번동','불광동','수색동','역촌동','응암동','증산동','진관동'],'종로구':['가회동','삼청동','세종로','안국동','인사동','종로','평창동','혜화동','효자동'],'중구':['광희동','명동','봉래동','서소문동','소공동','신당동','을지로','장충동','충무로','회현동'],'중랑구':['망우동','면목동','묵동','상봉동','신내동','중화동']},
+'경기':{'가평군':['가평읍','설악면','청평면','상면','하면','북면','조종면'],'고양시 덕양구':['주교동','성사동','행신동','화정동','대덕동','원당동','지축동','향동동','삼송동','원흥동','효자동','화전동','덕은동','벽제동'],'고양시 일산동구':['마두동','백석동','장항동','정발산동','풍동','식사동','중산동'],'고양시 일산서구':['대화동','일산동','주엽동','탄현동','덕이동','가좌동'],'과천시':['갈현동','과천동','관문동','막계동','문원동','별양동','부림동','주암동','중앙동'],'광명시':['가학동','광명동','노온사동','소하동','옥길동','일직동','철산동','하안동'],'광주시':['경안동','곤지암읍','남종면','남한산성면','도척면','오포읍','초월읍','퇴촌면'],'구리시':['갈매동','교문동','사노동','수택동','인창동','토평동'],'군포시':['군포동','금정동','당동','당정동','대야동','부곡동','산본동'],'김포시':['감정동','걸포동','고촌읍','구래동','대곶면','마산동','양촌읍','운양동','월곶면','장기동','통진읍','하성면','풍무동'],'남양주시':['금곡동','다산동','별내동','별내면','수동면','양정동','오남읍','일패동','조안면','진건읍','진접읍','퇴계원면','평내동','호평동','화도읍','도농동'],'동두천시':['동두천동','보산동','생연동','송내동','지행동','중앙동'],'부천시':['고강동','상동','소사동','송내동','심곡동','역곡동','오정동','옥길동','원미동','중동','춘의동'],'성남시 분당구':['구미동','금곡동','백현동','분당동','삼평동','서현동','수내동','야탑동','이매동','정자동','판교동','운중동'],'성남시 수정구':['고등동','단대동','복정동','산성동','수진동','신흥동','심곡동','위례동','태평동'],'성남시 중원구':['갈현동','금광동','도촌동','상대원동','성남동','은행동','중앙동'],'수원시 권선구':['고색동','권선동','구운동','금곡동','서둔동','세류동','오목천동','호매실동'],'수원시 영통구':['광교동','망포동','매탄동','영통동','원천동','이의동'],'수원시 장안구':['송죽동','연무동','율전동','조원동','파장동','정자동','천천동'],'수원시 팔달구':['매교동','매산로','북수동','신풍동','우만동','인계동','지동','화서동'],'시흥시':['거모동','과림동','대야동','목감동','배곧동','신천동','은행동','정왕동','월곶동'],'안산시 단원구':['고잔동','성곡동','신길동','와동','원곡동','초지동'],'안산시 상록구':['건건동','부곡동','본오동','사동','성포동','수암동','일동'],'안성시':['공도읍','금광면','대덕면','미양면','보개면','서운면','양성면','원곡면','죽산면'],'안양시 동안구':['관양동','비산동','호계동','평촌동'],'안양시 만안구':['박달동','석수동','안양동'],'양주시':['광적면','남면','백석읍','옥정동','은현면','장흥면','회천동','덕계동','덕정동'],'양평군':['양평읍','강상면','강하면','개군면','단월면','서종면','양동면','양서면','옥천면','용문면','지평면','청운면'],'여주시':['가남읍','강천면','금사면','대신면','북내면','산북면','세종대왕면','점동면','흥천면'],'연천군':['연천읍','전곡읍','군남면','미산면','백학면','신서면','왕징면','장남면','청산면'],'오산시':['가장동','금암동','대원동','세교동','수청동','신장동','오산동','은계동','청학동'],'용인시 기흥구':['구갈동','농서동','마북동','보라동','보정동','상갈동','신갈동','영덕동','청덕동','동백동'],'용인시 수지구':['고기동','동천동','상현동','성복동','신봉동','죽전동','풍덕천동'],'용인시 처인구':['남사읍','모현읍','백암면','양지면','역북동','원삼면','이동읍','김량장동','마평동'],'의왕시':['고천동','내손동','오전동','청계동','포일동','학의동'],'의정부시':['가능동','금오동','녹양동','낙양동','민락동','산곡동','신곡동','용현동','의정부동','장암동','호원동'],'이천시':['대월면','마장면','모가면','백사면','부발읍','설성면','신둔면','율면','장호원읍','호법면'],'파주시':['광탄면','교하동','군내면','금촌동','문산읍','법원읍','운정동','월롱면','적성면','조리읍','탄현면','파주읍','파평면'],'평택시':['고덕면','비전동','서정동','세교동','신장동','안중읍','오성면','진위면','청북읍','팽성읍','포승읍','현덕면','평택동'],'포천시':['가산면','관인면','군내면','내촌면','소흘읍','신북면','영북면','영중면','이동면','일동면','창수면','화현면'],'하남시':['감일동','교산동','덕풍동','미사동','신장동','창우동','천현동','춘궁동','풍산동'],'화성시':['남양읍','동탄동','마도면','매송면','봉담읍','비봉면','새솔동','서신면','송산면','양감면','우정읍','장안면','정남면','진안동','팔탄면','향남읍','병점동']},
+'인천':{'강화군':['강화읍','교동면','길상면','내가면','불은면','삼산면','선원면','송해면','양도면','양사면','하점면','화도면'],'계양구':['계산동','다남동','동양동','박촌동','서운동','임학동','작전동','효성동'],'남동구':['간석동','고잔동','구월동','남촌동','논현동','도림동','만수동','서창동'],'동구':['금곡동','만석동','송림동','송현동','창영동','화수동'],'미추홀구':['관교동','도화동','문학동','숭의동','용현동','주안동','학익동'],'부평구':['갈산동','구산동','부개동','부평동','삼산동','산곡동','십정동','청천동'],'서구':['가정동','가좌동','검암동','금곡동','당하동','대곡동','백석동','석남동','신현동','청라동'],'연수구':['동춘동','선학동','송도동','연수동','옥련동','청학동'],'옹진군':['북도면','백령면','대청면','덕적면','영흥면']},
+'강원':{'강릉시':['강문동','교동','구정면','사천면','성산면','연곡면','옥계면','왕산면','주문진읍'],'고성군':['간성읍','거진읍','수동면','죽왕면','토성면','현내면'],'동해시':['묵호동','북삼동','삼화동','송정동','천곡동'],'삼척시':['가곡면','근덕면','도계읍','미로면','원덕읍','하장면'],'속초시':['교동','노학동','대포동','설악동','영랑동','조양동','중앙동'],'양구군':['양구읍','남면','동면','방산면','해안면'],'양양군':['양양읍','강현면','서면','손양면','현남면','현북면'],'영월군':['영월읍','김삿갓면','남면','무릉도원면','북면','상동읍','수주면','주천면'],'원주시':['관설동','귀래면','단계동','문막읍','반곡동','소초면','지정면','태장동','판부면','학성동','호저면','흥업면'],'인제군':['인제읍','기린면','남면','북면','상남면','서화면'],'정선군':['정선읍','고한읍','남면','사북읍','신동읍','여량면','임계면'],'철원군':['갈말읍','근남면','김화읍','동송읍','서면','철원읍'],'춘천시':['남면','남산면','동내면','동면','봉의동','서면','신북읍','우두동','효자동'],'태백시':['금천동','동점동','상장동','장성동','철암동','황지동'],'평창군':['평창읍','대관령면','대화면','미탄면','방림면','봉평면','용평면','진부면'],'홍천군':['홍천읍','남면','내면','내촌면','동면','두촌면','북방면','서면','서석면','화촌면'],'횡성군':['횡성읍','갑천면','강림면','공근면','둔내면','서원면','안흥면','우천면','청일면']},
+'충청북도(충북)':{'청주시 상당구':['남문로','내덕동','명암동','미원면','산성동','영운동','오근장면','용암동','율량동'],'청주시 서원구':['개신동','남이면','모충동','분평동','산남동','수곡동','현도면'],'청주시 흥덕구':['가경동','강내면','복대동','봉명동','비하동','오송읍','옥산면','운천동'],'청주시 청원구':['내수읍','북이면','오창읍','율량동','주성동'],'충주시':['교현동','금가면','노은면','달천동','대소원면','동량면','목행동','산척면','살미면','소태면','수안보면','신니면','앙성면','엄정면','중앙탑면','칠금동'],'제천시':['교동','금성면','덕산면','두학동','백운면','봉양읍','송학면','수산면','신백동','영천동','의림동','장락동','한수면'],'보은군':['보은읍','내북면','마로면','산외면','삼승면','속리산면','수한면','장안면','탄부면','회남면','회인면'],'옥천군':['옥천읍','군북면','군서면','동이면','안남면','안내면','이원면','청산면','청성면'],'영동군':['영동읍','매곡면','상촌면','심천면','양강면','양산면','용산면','용화면','추풍령면','학산면','황간면'],'증평군':['증평읍','도안면'],'진천군':['진천읍','광혜원면','덕산읍','만승면','백곡면','문백면','이월면','초평면'],'괴산군':['괴산읍','감물면','문광면','불정면','사리면','소수면','연풍면','장연면','청안면','청천면','칠성면'],'음성군':['음성읍','감곡면','금왕읍','대소면','맹동면','삼성면','생극면','소이면','원남면'],'단양군':['단양읍','가곡면','단성면','대강면','매포읍','어상천면','영춘면','적성면']},
+'충청남도(충남)':{'천안시 동남구':['구성동','대흥동','목천읍','봉명동','병천면','쌍용동','안서동','오룡동','청당동','풍세면','광덕면','동면','수신면'],'천안시 서북구':['두정동','백석동','불당동','성거읍','성정동','직산읍','성환읍','입장면'],'공주시':['금성동','봉황동','신관동','옥룡동','웅진동','이인면','계룡면','반포면','사곡면','유구읍','의당면','정안면','탄천면'],'보령시':['남포면','대천동','미산면','성주면','오천면','웅천읍','주교면','천북면','청라면','청소면'],'아산시':['모종동','배방읍','온양동','풍기동','탕정면','둔포면','선장면','도고면','신창면','영인면','인주면','송악면'],'서산시':['갈산동','고북면','대산읍','부석면','석남동','성연면','음암면','인지면','지곡면','팔봉면','해미면'],'논산시':['강경읍','관촉동','광석면','노성면','벌곡면','부적면','상월면','성동면','양촌면','연무읍','연산면','은진면'],'계룡시':['금암동','두마면','엄사면','신도안면'],'당진시':['당진동','합덕읍','송악읍','고대면','대호지면','면천면','석문면','송산면','순성면','신평면','우강면','정미면'],'금산군':['금산읍','금성면','남이면','남일면','복수면','부리면','제원면','진산면','추부면'],'부여군':['부여읍','규암면','남면','내산면','석성면','세도면','양화면','외산면','옥산면','임천면','초촌면','홍산면'],'서천군':['서천읍','기산면','마산면','마서면','문산면','비인면','서면','시초면','종천면','판교면','한산면','화양면'],'청양군':['청양읍','남양면','대치면','목면','비봉면','운곡면','장평면','정산면','청남면','화성면'],'홍성군':['홍성읍','갈산면','결성면','광천읍','금마면','구항면','서부면','은하면','장곡면','홍동면','홍북읍'],'예산군':['예산읍','삽교읍','광시면','대술면','대흥면','덕산면','봉산면','신암면','신양면','오가면','응봉면','고덕면'],'태안군':['태안읍','남면','근흥면','고남면','소원면','원북면','이원면','안면읍']},
+'경상북도(경북)':{'포항시 남구':['구룡포읍','대송면','동해면','연일읍','오천읍','장기면','효자동'],'포항시 북구':['기계면','기북면','두호동','송라면','신광면','양덕동','죽장면','청하면','흥해읍'],'경주시':['감포읍','건천읍','내남면','산내면','서면','안강읍','양남면','양북면','외동읍','천북면','현곡면'],'김천시':['감문면','감천면','개령면','구성면','남면','대덕면','봉산면','아포읍','어모면','증산면','지례면','조마면'],'안동시':['길안면','남선면','남후면','녹전면','도산면','동후면','북후면','서후면','와룡면','임동면','임하면','풍산읍','풍천면'],'구미시':['고아읍','도개면','무을면','산동읍','선산읍','옥성면','장천면','해평면'],'영주시':['단산면','문정면','봉현면','부석면','순흥면','안정면','이산면','장수면','평은면','풍기읍'],'영천시':['고경면','금호읍','남산면','대창면','북안면','신녕면','임고면','자양면','청통면','화남면','화북면'],'상주시':['가은면','공검면','공성면','낙동면','내서면','모동면','모서면','사벌면','외남면','외서면','은척면','이안면','중동면','청리면','함창읍'],'문경시':['가은읍','농암면','동로면','마성면','문경읍','산북면','산양면','영순면','호계면'],'경산시':['남산면','남천면','압량읍','와촌면','용성면','자인면','진량읍','하양읍'],'군위군':['군위읍','부계면','산성면','소보면','우보면','의흥면','효령면'],'의성군':['의성읍','가음면','금성면','다인면','단밀면','단북면','단촌면','봉양면','비안면','안계면','안사면','옥산면','점곡면','춘산면'],'청송군':['청송읍','안덕면','진보면','파천면','현동면','현서면','부남면','부동면'],'영양군':['영양읍','석보면','수비면','입암면','일월면','청기면'],'영덕군':['영덕읍','강구면','남정면','달산면','병곡면','영해면','지품면','축산면','창수면'],'청도군':['청도읍','각남면','각북면','금천면','매전면','운문면','이서면','풍각면','화양읍'],'고령군':['대가야읍','개진면','다산면','덕곡면','성산면','쌍림면','우곡면','운수면'],'성주군':['성주읍','가천면','금수면','대가면','벽진면','선남면','수륜면','용암면','월항면','초전면'],'칠곡군':['왜관읍','가산면','기산면','동명면','북삼읍','석적읍','약목면','지천면'],'예천군':['예천읍','감천면','개포면','보문면','상리면','용궁면','유천면','은풍면','지보면','풍양면','호명면'],'봉화군':['봉화읍','명호면','물야면','법전면','봉성면','상운면','소천면','석포면','재산면','춘양면'],'울진군':['울진읍','근남면','금강송면','기성면','매화면','북면','온정면','죽변면','평해읍','후포면'],'울릉군':['울릉읍','북면','서면']},
+'경상남도(경남)':{'창원시 의창구':['대산면','동읍','북면','봉곡동','봉림동','명곡동','팔용동'],'창원시 성산구':['가음동','남양동','내동','상남동','성주동','용지동','웅남동','중앙동'],'창원시 마산합포구':['교방동','산호동','석전동','진동면','진북면','진전면','해운동'],'창원시 마산회원구':['구암동','내서읍','봉암동','양덕동','합성동','회원동'],'창원시 진해구':['경화동','여좌동','용원동','자은동','중앙동','충무동','풍호동'],'김해시':['대동면','봉황동','생림면','장유동','진례면','진영읍','주촌면','한림면','활천동'],'진주시':['강남동','금곡면','금산면','내동면','대곡면','대평면','명석면','문산읍','미천면','수곡면','이반성면','일반성면','정촌면','지수면','집현면','초전동'],'통영시':['광도면','도산면','봉평동','산양읍','욕지면','인평동','중앙동','한산면'],'사천시':['곤명면','곤양면','사남면','사천읍','용현면','정동면','축동면'],'밀양시':['단장면','무안면','부북면','상남면','상동면','산내면','산외면','삼랑진읍','청도면','초동면','하남읍'],'거제시':['거제면','고현동','남부면','동부면','둔덕면','사등면','연초면','옥포동','일운면','장목면','하청면'],'양산시':['동면','물금읍','상북면','원동면','하북면','중앙동','명곡동','덕계동'],'의령군':['의령읍','가례면','대의면','봉수면','부림면','용덕면','유곡면','정곡면','지정면','칠곡면','화정면'],'함안군':['가야읍','군북면','대산면','법수면','산인면','여항면','칠북면','칠서면','칠원읍','함안면'],'창녕군':['창녕읍','고암면','남지읍','대합면','도천면','부곡면','성산면','영산면','유어면','이방면','계성면'],'고성군':['고성읍','개천면','거류면','대가면','동해면','마암면','삼산면','영오면','영현면','하이면','회화면'],'남해군':['남해읍','고현면','남면','미조면','삼동면','상주면','서면','설천면','이동면','창선면'],'하동군':['하동읍','고전면','금남면','금성면','남면','북천면','악양면','옥종면','적량면','진교면','청암면','횡천면','화개면'],'산청군':['산청읍','금서면','단성면','생초면','시천면','신안면','신등면','삼장면','오부면','차황면'],'함양군':['함양읍','마천면','백전면','병곡면','서상면','서하면','수동면','안의면','유림면','지곡면','휴천면'],'거창군':['거창읍','가조면','가북면','고제면','남상면','남하면','마리면','북상면','신원면','웅양면','위천면','주상면'],'합천군':['합천읍','가야면','가회면','대병면','대양면','덕곡면','묘산면','봉산면','삼가면','쌍백면','야로면','용주면','율곡면','적중면','청덕면','초계면','해인사면']},
+'전라북도(전북)':{'전주시 완산구':['경원동','교동','다가동','삼천동','서신동','중앙동','효자동','평화동'],'전주시 덕진구':['금암동','덕진동','만성동','송천동','인후동','진북동','팔복동','호성동'],'군산시':['구암동','나운동','대야면','산북동','서수면','성산면','소룡동','수송동','옥구읍','옥산면','월명동','임피면','조촌동','회현면'],'익산시':['금강동','삼기면','성당면','송학동','어양동','여산면','영등동','오산면','왕궁면','용동면','웅포면','팔봉동','함라면','함열읍','황등면'],'정읍시':['감곡면','고부면','내장동','덕천면','북면','산내면','산외면','소성면','신태인읍','영원면','입암면','칠보면','태인면'],'남원시':['대강면','대산면','덕과면','보절면','사매면','산내면','산동면','수지면','아영면','운봉읍','이백면','인월면','주생면','주천면'],'김제시':['광활면','금구면','금산면','만경읍','백구면','백산면','봉남면','성덕면','용지면','죽산면','진봉면','청하면','황산면'],'완주군':['고산면','봉동읍','비봉면','삼례읍','상관면','소양면','운주면','용진읍','이서면','화산면'],'진안군':['진안읍','마령면','백운면','부귀면','상전면','성수면','안천면','용담면','주천면'],'무주군':['무주읍','무풍면','부남면','설천면','안성면','적상면'],'장수군':['장수읍','계남면','계북면','번암면','산서면','장계면','천천면'],'임실군':['임실읍','강진면','관촌면','덕치면','삼계면','성수면','신덕면','신평면','오수면','운암면','청웅면'],'순창군':['순창읍','금과면','동계면','복흥면','쌍치면','적성면','인계면','팔덕면','풍산면'],'고창군':['고창읍','고수면','공음면','대산면','무장면','상하면','성내면','성송면','신림면','아산면','해리면','흥덕면'],'부안군':['부안읍','계화면','동진면','백산면','보안면','변산면','산내면','상서면','줄포면','진서면','하서면','행안면']},
+'전라남도(전남)':{'목포시':['남교동','대양동','동명동','산정동','석현동','연산동','옥암동','용당동','하당동'],'여수시':['교동','남면','돌산읍','삼산면','소라면','여서동','율촌면','중앙동','화양면','화정면'],'순천시':['금곡동','별량면','서면','송광면','승주읍','연향동','외서면','조례동','주암면','풍덕동','해룡면','황전면'],'나주시':['금천면','남평읍','노안면','다시면','동강면','문평면','반남면','봉황면','빛가람동','산포면','세지면','왕곡면','공산면'],'광양시':['광양읍','광영동','금호동','다압면','봉강면','옥곡면','옥룡면','진상면','진월면'],'담양군':['담양읍','고서면','금성면','남면','대덕면','대전면','무정면','봉산면','수북면','용면','월산면','창평면'],'곡성군':['곡성읍','겸면','고달면','삼기면','석곡면','오곡면','오산면','옥과면','입면','죽곡면'],'구례군':['구례읍','간전면','광의면','마산면','문척면','산동면','용방면','토지면'],'고흥군':['고흥읍','과역면','금산면','남양면','대서면','도양읍','두원면','동강면','봉래면','영남면','점암면','포두면','풍양면'],'보성군':['보성읍','겸백면','노동면','득량면','문덕면','벌교읍','복내면','웅치면','조성면','회천면'],'화순군':['화순읍','남면','능주면','도곡면','도암면','동면','동복면','북면','이서면','이양면','춘양면','한천면'],'장흥군':['장흥읍','관산읍','대덕읍','부산면','안양면','용산면','유치면','장동면','장평면','회진면'],'강진군':['강진읍','군동면','대구면','도암면','마량면','병영면','성전면','신전면','칠량면'],'해남군':['해남읍','계곡면','마산면','문내면','북일면','북평면','삼산면','산이면','송지면','옥천면','현산면','화산면','화원면','황산면'],'영암군':['영암읍','군서면','금정면','덕진면','도포면','미암면','삼호읍','서호면','시종면','신북면','학산면'],'무안군':['무안읍','망운면','몽탄면','삼향읍','운남면','일로읍','청계면','현경면','해제면'],'함평군':['함평읍','나산면','대동면','손불면','신광면','엄다면','월야면','학교면','해보면'],'영광군':['영광읍','백수읍','군남면','대마면','묘량면','불갑면','법성면','염산면','홍농읍'],'장성군':['장성읍','남면','동화면','북일면','북이면','삼계면','삼서면','서삼면','진원면','황룡면'],'완도군':['완도읍','고금면','군외면','금일읍','노화읍','보길면','신지면','약산면','청산면'],'진도군':['진도읍','고군면','군내면','의신면','임회면','조도면','지산면'],'신안군':['압해읍','도초면','비금면','안좌면','암태면','임자면','자은면','증도면','지도읍','팔금면','하의면']},
+'제주':{'제주시':['구좌읍','노형동','도두동','삼도동','삼양동','아라동','애월읍','연동','용담동','우도면','이도동','이호동','일도동','조천읍','한경면','한림읍','화북동','오라동'],'서귀포시':['남원읍','대정읍','대포동','동홍동','법환동','서귀동','서호동','성산읍','안덕면','영남동','예래동','중문동','토평동','표선면','호근동']}
+};
+
+const EM=['gwang-jin@naver.com','santar7021@naver.com'],EN=['광진','영진'];
+let O=[],CK=new Set(),CF='all',EI=null,SE=null,openGrps=new Set();
+
+function ld(){try{O=JSON.parse(localStorage.getItem('po3'))||[]}catch(e){O=[]}}
+function sv(){try{localStorage.setItem('po3',JSON.stringify(O))}catch(e){}}
+
+// 보내는 사람 키: 성명 + 연락처 끝 4자리
+function senderKey(o){return o.s.nm+'|'+last4(o.s.ph)}
+function last4(ph){const d=ph.replace(/[^0-9]/g,'');return d.slice(-4)}
+
+// ===== 주소 =====
+function initA(){['s','r'].forEach(p=>{const d=document.getElementById(p+'D');Object.keys(A).sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;d.appendChild(o)})})}
+function onDo(p){const pv=document.getElementById(p+'D').value;const ce=document.getElementById(p+'C'),se=document.getElementById(p+'G');ce.innerHTML='<option value="">시/군/구</option>';se.innerHTML='<option value="">구/읍면동</option>';se.disabled=true;document.getElementById(p+'Hint').textContent='';if(!pv){ce.disabled=true;return}ce.disabled=false;Object.keys(A[pv]||{}).sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;ce.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='✏️ 직접입력';ce.appendChild(oi)}
+function onCi(p){const pv=document.getElementById(p+'D').value,cv=document.getElementById(p+'C').value;const se=document.getElementById(p+'G');se.innerHTML='<option value="">구/읍면동</option>';document.getElementById(p+'Hint').textContent='';if(cv==='__i__'){se.disabled=true;const v=prompt('시/군/구 입력:');if(v){const s=document.getElementById(p+'C');const o=document.createElement('option');o.value=v;o.textContent=v;s.insertBefore(o,s.lastChild);s.value=v}else document.getElementById(p+'C').value='';return}if(!cv){se.disabled=true;return}const subs=A[pv]?.[cv]||[];if(!subs.length){se.disabled=true;return}se.disabled=false;subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;se.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='✏️ 직접입력';se.appendChild(oi);updateHint(p)}
+function onSub(el){const p=el.id.charAt(0);if(el.value==='__i__'){const v=prompt('읍/면/동 입력:');if(v){const o=document.createElement('option');o.value=v;o.textContent=v;el.insertBefore(o,el.lastChild);el.value=v}else el.value=''}updateHint(p)}
+function updateHint(p){const parts=[document.getElementById(p+'D').value,document.getElementById(p+'C').value,document.getElementById(p+'G').value].filter(v=>v&&v!=='__i__');document.getElementById(p+'Hint').textContent=parts.length?'📍 '+parts.join(' > '):''}
+let curCat='';
+const CAT_DATA={
+  '배':{varieties:['만풍','신고','추황','황금'],qtyLabel:'과수 (kg)',qtys:['8','9','10','11','12','13']},
+  '배즙':{varieties:['배즙'],qtyLabel:'수량 (박스)',qtys:['1','2','3','4','5','6','7','8','9','10']}
+};
+function pickCat(cat){
+  curCat=cat;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.toggle('on',b.dataset.cat===cat));
+  const fv=document.getElementById('fV'),fq=document.getElementById('fQ');
+  const d=CAT_DATA[cat];
+  // 품종
+  fv.innerHTML='<option value="">선택</option>';
+  d.varieties.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;fv.appendChild(o)});
+  fv.innerHTML+='<option value="__i__">✏️ 직접입력</option>';
+  // 수량
+  document.getElementById('fQLabel').innerHTML=d.qtyLabel+' <span class="rq">*</span>';
+  fq.innerHTML='<option value="">선택</option>';
+  d.qtys.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;fq.appendChild(o)});
+  fq.innerHTML+='<option value="__i__">✏️ 직접입력</option>';
+}
+function customSel(el,msg){if(el.value!=='__i__')return;const v=prompt(msg);if(v&&v.trim()){const o=document.createElement('option');o.value=v.trim();o.textContent=v.trim();el.insertBefore(o,el.querySelector('[value="__i__"]'));el.value=v.trim()}else el.value=''}
+function ensureOpt(sel,val){if(!val)return;for(let i=0;i<sel.options.length;i++)if(sel.options[i].value===val)return;const o=document.createElement('option');o.value=val;o.textContent=val;sel.insertBefore(o,sel.querySelector('[value="__i__"]'));} 
+function fmtP(el){let v=el.value.replace(/[^0-9]/g,'');if(v.length>3&&v.length<=7)v=v.slice(0,3)+'-'+v.slice(3);else if(v.length>7)v=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);el.value=v}
+
+// ===== 렌더링 =====
+function render(){rStats();rList();uBB()}
+function rStats(){
+  const t=O.length,a=O.filter(o=>o.st==='접수').length,b=O.filter(o=>o.st==='접수완료').length;
+  // 보내는사람 기준 그룹 수
+  const grps=new Set(O.map(senderKey));
+  document.getElementById('stats').innerHTML=`
+    <div class="sc"><div class="n">${t}</div><div class="l">전체 주문</div></div>
+    <div class="sc"><div class="n" style="color:var(--ac)">${grps.size}</div><div class="l">주문자 수</div></div>
+    <div class="sc"><div class="n" style="color:var(--in)">${a}</div><div class="l">접수</div></div>
+    <div class="sc"><div class="n" style="color:var(--pr)">${b}</div><div class="l">접수완료</div></div>`;
+}
+function rList(){
+  const el=document.getElementById('olist');
+  let filtered=CF==='all'?[...O]:O.filter(o=>o.st===CF);
+  if(!filtered.length){el.innerHTML='<div class="es"><div class="ic">📋</div><p>등록된 주문이 없습니다.<br>"접수 신청" 버튼으로 추가하세요.</p></div>';return}
+
+  // 보내는 사람 기준 그룹핑
+  const groups={};
+  filtered.forEach(o=>{const k=senderKey(o);if(!groups[k])groups[k]=[];groups[k].push(o)});
+
+  // 그룹별 최신 주문 기준 정렬
+  const sortedKeys=Object.keys(groups).sort((a,b)=>{
+    const la=groups[a].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
+    const lb=groups[b].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
+    return lb-la;
+  });
+
+  el.innerHTML=sortedKeys.map(k=>{
+    const items=groups[k].sort((a,b)=>new Date(b.ca)-new Date(a.ca));
+    const first=items[0];
+    const nm=first.s.nm;
+    const ph4=last4(first.s.ph);
+    const isOpen=openGrps.has(k);
+    const allIds=items.map(o=>o.id);
+    const allChecked=allIds.every(id=>CK.has(id));
+    const 접수cnt=items.filter(o=>o.st==='접수').length;
+    const 완료cnt=items.filter(o=>o.st==='접수완료').length;
+
+    let badges='';
+    if(접수cnt)badges+=`<span class="badge b접수">접수 ${접수cnt}</span>`;
+    if(완료cnt)badges+=`<span class="badge b접수완료">완료 ${완료cnt}</span>`;
+
+    const subHtml=items.map(o=>{
+      const d=new Date(o.ca);
+      const ds=`${d.getMonth()+1}/${d.getDate()} ${Z(d.getHours())}:${Z(d.getMinutes())}`;
+      const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
+      const ck=CK.has(o.id);
+      return`<div class="sub-order" style="${ck?'background:var(--pl)':''}">
+        <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
+        <div class="sub-info">
+          <div class="sub-top"><span class="sub-id">#${o.id.slice(-4).toUpperCase()}</span><span class="badge b${o.st}">${o.st}</span><span class="sub-date">${ds}</span></div>
+          <div class="sub-det"><span class="tg">${o.cat==='배즙'?'🧃':'🍐'} ${o.va}</span> ${o.qt}${o.cat==='배즙'?'박스':'kg'}</div>
+          <div class="sub-recv">받는 분: <strong>${o.r.nm}</strong> (${last4(o.r.ph)})</div>
+          ${ra?`<div class="sub-addr">📍 ${ra}</div>`:''}
+          ${o.r.no?`<div class="sub-note">💬 ${o.r.no}</div>`:''}
+          <div class="sub-acts">
+            <button class="bs bst" onclick="event.stopPropagation();cyc('${o.id}')">${o.st==='접수'?'▸ 접수완료':'↩ 접수'}</button>
+            <button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>
+            <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return`<div class="grp ${allChecked?'ck':''}">
+      <div class="grp-hd" onclick="togGrp('${k}')">
+        <input type="checkbox" ${allChecked?'checked':''} onclick="event.stopPropagation()" onchange="togGrpCk('${k}',this.checked)">
+        <div class="grp-info">
+          <div><span class="grp-sender">${nm}</span> <span class="grp-phone">(${ph4})</span> <span class="grp-date">${(()=>{const d=new Date(first.ca);return String(d.getFullYear()).slice(2)+'.'+Z(d.getMonth()+1)+'.'+Z(d.getDate())+' '+Z(d.getHours())+':'+Z(d.getMinutes())})()}</span></div>
+          <div class="grp-right"><span class="grp-cnt">${items.length}건</span><div class="grp-badges">${badges}</div></div>
+        </div>
+        <span class="grp-arrow ${isOpen?'open':''}">▼</span>
+      </div>
+      <div class="grp-body ${isOpen?'open':''}">${subHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function Z(n){return String(n).padStart(2,'0')}
+function togGrp(k){openGrps.has(k)?openGrps.delete(k):openGrps.add(k);rList()}
+function togGrpCk(k,checked){
+  const items=O.filter(o=>senderKey(o)===k);
+  // 필터 적용
+  const filtered=CF==='all'?items:items.filter(o=>o.st===CF);
+  filtered.forEach(o=>{checked?CK.add(o.id):CK.delete(o.id)});
+  render();
+}
+
+function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;o.st=o.st==='접수'?'접수완료':'접수';sv();render();toast(`상태: "${o.st}"`)}
+function tCk(id){CK.has(id)?CK.delete(id):CK.add(id);render()}
+function togAll(){const a=document.getElementById('selAll').checked;const f=CF==='all'?O:O.filter(o=>o.st===CF);a?f.forEach(o=>CK.add(o.id)):CK.clear();render();document.getElementById('selAll').checked=a}
+function uBB(){const b=document.getElementById('bbar'),c=CK.size;c>0?(b.classList.remove('hid'),document.getElementById('cCnt').textContent=c):b.classList.add('hid')}
+function filt(f,btn){CF=f;document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));btn.classList.add('on');CK.clear();document.getElementById('selAll').checked=false;render()}
+
+function sm(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden'}
+function cm(id){document.getElementById(id).classList.remove('show');document.body.style.overflow=''}
+function showCh(){sm('mCh')}
+
+function openForm(d){
+  EI=d?d.id:null;document.getElementById('fTit').textContent=EI?'주문서 수정':'주문서 작성';
+  // 카테고리 복원
+  curCat='';
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('on'));
+  const fvEl=document.getElementById('fV'),fqEl=document.getElementById('fQ');
+  if(d?.cat){pickCat(d.cat);if(d.va)ensureOpt(fvEl,d.va);fvEl.value=d?.va||'';if(d.qt)ensureOpt(fqEl,d.qt);fqEl.value=d?.qt||''}
+  else{fvEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>';fqEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>'}
+  document.getElementById('sN').value=d?.s?.nm||'';document.getElementById('sP').value=d?.s?.ph||'';
+  sAddr('s',d?.s);document.getElementById('sA').value=d?.s?.dt||'';
+  document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||'';
+  sAddr('r',d?.r);document.getElementById('rA').value=d?.r?.dt||'';
+  document.getElementById('rNo').value=d?.r?.no||'';sm('mForm');
+}
+function sAddr(p,d){
+  const de=document.getElementById(p+'D'),ce=document.getElementById(p+'C'),se=document.getElementById(p+'G');
+  de.value=d?.pv||'';onDo(p);
+  if(d?.ci){let f=false;for(let i=0;i<ce.options.length;i++)if(ce.options[i].value===d.ci){f=true;break}
+    if(!f){const o=document.createElement('option');o.value=d.ci;o.textContent=d.ci;ce.insertBefore(o,ce.lastChild)}ce.value=d.ci;onCi(p)}
+  if(d?.su){let f=false;for(let i=0;i<se.options.length;i++)if(se.options[i].value===d.su){f=true;break}
+    if(!f&&d.su){const o=document.createElement('option');o.value=d.su;o.textContent=d.su;se.insertBefore(o,se.lastChild)}se.value=d.su;updateHint(p)}
+}
+function saveO(){
+  if(!curCat)return toast('상품 구분(배/배즙)을 선택해주세요');
+  const va=document.getElementById('fV').value,qt=document.getElementById('fQ').value;
+  const sn=document.getElementById('sN').value.trim(),sp=document.getElementById('sP').value.trim();
+  const rn=document.getElementById('rN').value.trim(),rp=document.getElementById('rP').value.trim(),rd=document.getElementById('rD').value;
+  if(!va)return toast('품종을 선택해주세요');if(!qt)return toast('수량을 선택해주세요');
+  if(!sn)return toast('보내는 분 성명 입력');if(!sp)return toast('보내는 분 연락처 입력');
+  if(!rn)return toast('받는 분 성명 입력');if(!rp)return toast('받는 분 연락처 입력');if(!rd)return toast('받는 분 주소(도) 선택');
+  const dt={cat:curCat,va,qt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
+    r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
+  if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1)Object.assign(O[i],dt);toast('수정 완료')}
+  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);toast('등록 완료')}
+  sv();render();cm('mForm');EI=null;
+}
+function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
+function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();toast('삭제 완료')}
+
+function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
+function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
+function doEm(){if(SE===null)return toast('받는 분 선택');const ck=O.filter(o=>CK.has(o.id));const su=encodeURIComponent(`[배 농장] 택배 전달 (${ck.length}건)`);let b='택배 전달 요청\n\n';ck.forEach((o,i)=>{const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');b+=`[${i+1}] ${o.va} ${o.qt}kg\n   보내는 분: ${o.s.nm} (${o.s.ph})\n   받는 분: ${o.r.nm} (${o.r.ph})\n   주소: ${ra}\n`;if(o.r.no)b+=`   비고: ${o.r.no}\n`;b+='\n'});window.open(`mailto:${EM[SE]}?subject=${su}&body=${encodeURIComponent(b)}`,'_blank');cm('mEm');toast(`${EN[SE]}님에게 전달`)}
+
+let ocrData=null,ocrB64='';
+function openCam(){
+  document.getElementById('camStep1').style.display='';
+  document.getElementById('camStep2').style.display='none';
+  document.getElementById('camInPhoto').value='';
+  document.getElementById('camInGallery').value='';
+  ocrData=null;ocrB64='';sm('mCam');
+}
+function camReset(){
+  document.getElementById('camStep1').style.display='';
+  document.getElementById('camStep2').style.display='none';
+  document.getElementById('camInPhoto').value='';
+  document.getElementById('camInGallery').value='';
+  ocrData=null;ocrB64='';
+}
+function camSelected(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    ocrB64=ev.target.result;
+    document.getElementById('camImg').src=ocrB64;
+    document.getElementById('camStep1').style.display='none';
+    document.getElementById('camStep2').style.display='';
+    document.getElementById('ocrResult').style.display='none';
+    document.getElementById('btnOcrApply').textContent='✅ 주문서에 적용';
+    runOcr(ocrB64);
+  };reader.readAsDataURL(f);
+}
+async function runOcr(dataUrl){
+  const status=document.getElementById('ocrStatus');
+  const result=document.getElementById('ocrResult');
+  status.style.display='';result.style.display='none';
+  document.getElementById('btnOcrApply').disabled=true;
+  try{
+    const base64=dataUrl.split(',')[1];
+    const mediaType=dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
+    const apiKey=getApiKey();
+    const headers={'Content-Type':'application/json'};
+    if(apiKey)headers['x-api-key']=apiKey;
+    headers['anthropic-version']='2023-06-01';
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers,
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+          {type:'text',text:`이 사진은 배 농장 주문서/택배 송장/메모입니다. 사진에서 다음 정보를 추출해서 JSON만 반환해주세요. 마크다운 없이 순수 JSON만 응답하세요.
+{
+  "sender_name":"보내는 사람 이름",
+  "sender_phone":"보내는 사람 전화번호",
+  "sender_addr":"보내는 사람 주소 전체",
+  "receiver_name":"받는 사람 이름",
+  "receiver_phone":"받는 사람 전화번호",
+  "receiver_addr":"받는 사람 주소 전체",
+  "product":"상품명(배 품종 또는 배즙 등)",
+  "quantity":"수량/무게",
+  "note":"비고/메모"
+}
+인식할 수 없는 항목은 빈 문자열로 두세요.`}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    const txt=data.content.map(c=>c.text||'').join('');
+    const clean=txt.replace(/```json|```/g,'').trim();
+    ocrData=JSON.parse(clean);
+    showOcrResult(ocrData);
+  }catch(err){
+    console.error('OCR error:',err);
+    status.style.display='none';
+    result.style.display='';
+    document.getElementById('ocrPreview').innerHTML='<p style="color:var(--dg)">인식에 실패했습니다. 주문서를 직접 작성해주세요.</p>';
+    ocrData=null;
+  }
+  document.getElementById('btnOcrApply').disabled=false;
+}
+function showOcrResult(d){
+  document.getElementById('ocrStatus').style.display='none';
+  document.getElementById('ocrResult').style.display='';
+  const rows=[
+    ['보내는 분',d.sender_name],['연락처',d.sender_phone],['주소',d.sender_addr],
+    ['받는 분',d.receiver_name],['연락처',d.receiver_phone],['주소',d.receiver_addr],
+    ['상품',d.product],['수량',d.quantity],['비고',d.note]
+  ].filter(r=>r[1]);
+  document.getElementById('ocrPreview').innerHTML=rows.map(r=>`<div class="ocr-row"><span class="ocr-label">${r[0]}</span><span class="ocr-val">${r[1]}</span></div>`).join('');
+  if(rows.length)document.getElementById('btnOcrApply').textContent='✅ 인식 정보로 주문서 작성';
+  else document.getElementById('btnOcrApply').textContent='✅ 주문서 직접 작성';
+}
+function applyOcr(){
+  cm('mCam');openForm();
+  if(!ocrData)return;
+  // 보내는 사람
+  if(ocrData.sender_name)document.getElementById('sN').value=ocrData.sender_name;
+  if(ocrData.sender_phone){let p=ocrData.sender_phone.replace(/[^0-9]/g,'');document.getElementById('sP').value=p;fmtP(document.getElementById('sP'))}
+  if(ocrData.sender_addr)document.getElementById('sA').value=ocrData.sender_addr;
+  // 받는 사람
+  if(ocrData.receiver_name)document.getElementById('rN').value=ocrData.receiver_name;
+  if(ocrData.receiver_phone){let p=ocrData.receiver_phone.replace(/[^0-9]/g,'');document.getElementById('rP').value=p;fmtP(document.getElementById('rP'))}
+  if(ocrData.receiver_addr)document.getElementById('rA').value=ocrData.receiver_addr;
+  // 상품
+  if(ocrData.product){
+    const prod=ocrData.product.toLowerCase();
+    if(prod.includes('즙')||prod.includes('juice'))pickCat('배즙');
+    else pickCat('배');
+    const fv=document.getElementById('fV');
+    const varieties=['만풍','신고','추황','황금','배즙'];
+    const match=varieties.find(v=>prod.includes(v));
+    if(match){fv.value=match}else if(ocrData.product.trim()){ensureOpt(fv,ocrData.product.trim());fv.value=ocrData.product.trim()}
+  }
+  if(ocrData.quantity){
+    const fq=document.getElementById('fQ');
+    const qNum=ocrData.quantity.replace(/[^0-9]/g,'');
+    if(qNum){ensureOpt(fq,qNum);fq.value=qNum}
+  }
+  if(ocrData.note)document.getElementById('rNo').value=ocrData.note;
+  toast('인식된 정보가 적용되었습니다');
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+// ===== API 키 관리 =====
+function getApiKey(){try{return localStorage.getItem('pearApiKey')||''}catch(e){return ''}}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(!k)return toast('API 키를 입력해주세요');
+  try{localStorage.setItem('pearApiKey',k)}catch(e){}
+  document.getElementById('apiKeyInput').value='';
+  updateKeyStatus();toast('API 키가 저장되었습니다');
+}
+function clearApiKey(){
+  if(!confirm('API 키를 삭제하시겠습니까?'))return;
+  try{localStorage.removeItem('pearApiKey')}catch(e){}
+  updateKeyStatus();toast('API 키가 삭제되었습니다');
+}
+function updateKeyStatus(){
+  const k=getApiKey();
+  const el=document.getElementById('keyStatus');
+  if(k){el.innerHTML=`<div class="key-status key-ok">✅ API 키가 설정되어 있습니다 (${k.slice(0,12)}...)</div>`}
+  else{el.innerHTML=`<div class="key-status key-no">⚠️ API 키가 설정되지 않았습니다</div>`}
+}
+// 데이터 내보내기/가져오기
+function exportData(){
+  const d=JSON.stringify(O,null,2);
+  const blob=new Blob([d],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='pear-orders-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);toast('주문 데이터를 내보냈습니다');
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    try{const d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d))throw new Error();
+      if(!confirm(`${d.length}건의 주문을 가져옵니다. 기존 데이터에 추가됩니다.`))return;
+      d.forEach(o=>{if(!O.find(x=>x.id===o.id))O.push(o)});
+      sv();render();toast(`${d.length}건 가져오기 완료`);
+    }catch(err){toast('파일 형식이 올바르지 않습니다')}
+  };r.readAsText(f);e.target.value='';
+}
+
+initA();ld();render();updateKeyStatus();
+</script>
+</body>
+</html>
