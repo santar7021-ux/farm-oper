@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>배 농장 주문 관리</title>
+<title>광진농원 주문 관리</title>
 <style>
 :root{--bg:#f5f3ef;--sf:#fff;--pr:#5a7a3a;--pl:#e8f0df;--pd:#3d5427;--ac:#c8a951;--tx:#2c2c2c;--tl:#6b6b6b;--bd:#ddd;--dg:#c0392b;--dl:#fdeaea;--in:#2980b9;--il:#eaf2f8;--rd:12px;--sh:0 2px 8px rgba(0,0,0,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--sf:#2a2a2a;--tx:#e8e8e8;--tl:#aaa;--bd:#444;--pl:#2d3a22;--dl:#3a1a1a;--il:#1a2a3a;--sh:0 2px 8px rgba(0,0,0,.3)}}
@@ -121,7 +121,7 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
 </style>
 </head>
 <body>
-<div class="hd"><h1><span>🍐</span> 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none">🔄</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
+<div class="hd"><h1><span>🍐</span> 광진농원 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none">🔄</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
 <div class="st" id="stats"></div>
 <div class="ls">
   <div class="lh"><label><input type="checkbox" id="selAll" onchange="togAll()"> 전체 선택</label>
