@@ -4,148 +4,190 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>광진농원 주문 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-:root{--bg:#f5f3ef;--sf:#fff;--pr:#5a7a3a;--pl:#e8f0df;--pd:#3d5427;--ac:#c8a951;--tx:#2c2c2c;--tl:#6b6b6b;--bd:#ddd;--dg:#c0392b;--dl:#fdeaea;--in:#2980b9;--il:#eaf2f8;--rd:12px;--sh:0 2px 8px rgba(0,0,0,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--sf:#2a2a2a;--tx:#e8e8e8;--tl:#aaa;--bd:#444;--pl:#2d3a22;--dl:#3a1a1a;--il:#1a2a3a;--sh:0 2px 8px rgba(0,0,0,.3)}}
-:root[data-theme="dark"]{--bg:#1a1a1a;--sf:#2a2a2a;--tx:#e8e8e8;--tl:#aaa;--bd:#444;--pl:#2d3a22;--dl:#3a1a1a;--il:#1a2a3a}
-*{box-sizing:border-box;margin:0;padding:0}html{scroll-padding-top:env(safe-area-inset-top,0)}html,body{height:100%}
-body{font-family:'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;background:var(--bg);color:var(--tx);font-size:17px;line-height:1.6}
-button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,select,textarea{font-family:inherit;font-size:17px}
+:root{--bg:#f6f5f1;--sf:#fff;--sf2:#faf9f6;--pr:#33582a;--pd:#24421d;--pl:#edf2e8;--ac:#b08a33;--at:#7a5f1f;--al:#f6efdd;--tx:#1c1d1a;--tl:#686a64;--tm:#9b9d96;--bd:#e4e2dc;--bd2:#eeece7;--dg:#b23a2f;--dl:#fbedeb;--rd:14px;--ring:0 0 0 3px rgba(51,88,42,.14);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;--ring:0 0 0 3px rgba(95,143,76,.25);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;font:inherit;color:inherit;background:none;border:none}
+input,select,textarea{font:inherit;color:inherit}
+a{color:var(--pr)}a:hover{color:var(--pd)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(--pr);flex-shrink:0;cursor:pointer}
+::placeholder{color:var(--tm)}
 
-.hd{background:var(--pr);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:env(safe-area-inset-top,0);z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.hd h1{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}.hd h1 span{font-size:28px}
-.bn{background:#fff;color:var(--pd);padding:10px 20px;border-radius:8px;font-weight:700;font-size:16px;display:flex;align-items:center;gap:6px;transition:transform .1s}.bn:active{transform:scale(.96)}
+.hd{position:sticky;top:0;z-index:100;padding-top:env(safe-area-inset-top,0px);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid var(--bd2)}
+.hd-in{max-width:720px;margin:0 auto;height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--pr);color:#fff;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+.brand h1{font-size:17px;font-weight:700;line-height:1.2;letter-spacing:-.02em;white-space:nowrap}
+.brand p{font-size:12.5px;color:var(--tl);line-height:1.2;margin-top:2px}
+.hd-act{display:flex;align-items:center;gap:2px}
+.ib{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--tl);transition:background .15s,color .15s}
+.ib:hover{background:var(--bd2);color:var(--tx)}
+.btn-sync.spinning svg{animation:spin .8s linear infinite}
+.bn{height:40px;padding:0 14px 0 11px;margin-left:6px;border-radius:10px;background:var(--pr);color:#fff;font-weight:600;font-size:15px;display:flex;align-items:center;gap:6px;transition:filter .15s,transform .1s}
+.bn:hover{filter:brightness(1.1)}.bn:active{transform:scale(.97)}
 
-/* 통계 */
-.st{display:flex;gap:10px;padding:14px 20px;overflow-x:auto}
-.sc{background:var(--sf);border-radius:var(--rd);padding:14px 18px;min-width:100px;box-shadow:var(--sh);text-align:center;flex-shrink:0}
-.sc .n{font-size:28px;font-weight:800;color:var(--pr)}.sc .l{font-size:14px;color:var(--tl);margin-top:2px}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 128px}
+.st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--sf);border:1px solid var(--bd);border-radius:var(--rd);overflow:hidden}
+.sc{padding:14px 16px 15px;min-width:0}.sc+.sc{border-left:1px solid var(--bd2)}
+.sc .l{font-size:12.5px;color:var(--tl);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.sc .n{font-size:24px;font-weight:700;letter-spacing:-.03em;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.1}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;background:var(--tm);flex-shrink:0}.dot.pend{background:var(--ac)}.dot.done{background:var(--pr)}
+@media(max-width:400px){.sc{padding:12px 12px 13px}.sc .n{font-size:21px}}
 
-/* 필터 & 리스트 */
-.ls{padding:0 16px 100px}
-.lh{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;position:sticky;top:62px;background:var(--bg);z-index:50}
-.lh label{font-size:15px;color:var(--tl);display:flex;align-items:center;gap:6px}.lh label input{width:20px;height:20px;accent-color:var(--pr)}
-.fb{display:flex;gap:6px}.ft{padding:6px 14px;border-radius:20px;font-size:14px;font-weight:600;background:var(--sf);color:var(--tl);border:1px solid var(--bd)}
-.ft.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.lh{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 12px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tl);cursor:pointer;user-select:none;white-space:nowrap}
+.fb{display:flex;gap:2px;padding:3px;background:var(--bd2);border-radius:10px}
+.ft{height:30px;padding:0 12px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--tl);transition:background .15s,color .15s;white-space:nowrap}
+.ft.on{background:var(--sf);color:var(--tx);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06),0 0 0 1px var(--bd)}
 
-/* 그룹 카드 (보내는 사람 기준) */
-.grp{background:var(--sf);border-radius:var(--rd);margin-bottom:12px;box-shadow:var(--sh);overflow:hidden}
-.grp.ck{outline:2px solid var(--pr)}
-.grp-hd{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;user-select:none;transition:background .15s}
-.grp-hd:active{background:var(--pl)}
-.grp-hd input[type=checkbox]{width:22px;height:22px;accent-color:var(--pr);flex-shrink:0}
-.grp-info{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.grp-sender{font-weight:700;font-size:17px;color:var(--tx)}
-.grp-phone{font-size:14px;color:var(--tl);font-weight:500}
-.grp-date{font-size:13px;color:var(--tl);font-weight:400;margin-left:4px}
-.grp-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.grp-cnt{background:var(--pr);color:#fff;padding:3px 12px;border-radius:16px;font-size:14px;font-weight:700}
-.grp-badges{display:flex;gap:4px}
-.badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.b접수{background:var(--il);color:var(--in)}.b접수완료{background:var(--pl);color:var(--pd)}
-.grp-arrow{font-size:14px;color:var(--tl);transition:transform .2s;flex-shrink:0}
-.grp-arrow.open{transform:rotate(180deg)}
-
-/* 펼친 주문 상세 */
-.grp-body{display:none;border-top:1px solid var(--bd)}
-.grp-body.open{display:block}
-.sub-order{padding:14px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px}
-.sub-order:last-child{border-bottom:none}
-.sub-order input[type=checkbox]{width:20px;height:20px;accent-color:var(--pr);flex-shrink:0}
+#olist{display:flex;flex-direction:column;gap:8px}
+.grp{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rd);overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.grp.ck{border-color:var(--pr);box-shadow:0 0 0 1px var(--pr)}
+.grp-hd{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 16px;cursor:pointer;user-select:none;transition:background .15s}
+.grp-hd:hover{background:var(--sf2)}
+.grp-info{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grp-l{min-width:0}
+.grp-name{display:flex;align-items:baseline;gap:8px;min-width:0}
+.grp-sender{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grp-phone{font-size:13px;color:var(--tm);font-variant-numeric:tabular-nums}
+.grp-meta{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tl);margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sep{width:3px;height:3px;border-radius:50%;background:var(--tm)}
+.grp-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
+.b접수{background:var(--al);color:var(--at)}.b접수완료{background:var(--pl);color:var(--pd)}
+.grp-arrow{color:var(--tm);display:flex;transition:transform .2s}.grp-arrow.open{transform:rotate(180deg)}
+.grp-body{display:none;border-top:1px solid var(--bd2);background:var(--sf2)}.grp-body.open{display:block}
+.sub-order{display:flex;align-items:flex-start;gap:14px;padding:14px 14px 14px 16px;transition:background .15s}
+.sub-order+.sub-order{border-top:1px solid var(--bd2)}
+.sub-order.on{background:var(--pl)}
+.sub-order>input{margin-top:1px}
 .sub-info{flex:1;min-width:0}
-.sub-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px}
-.sub-id{font-weight:700;color:var(--pd);font-size:14px}
-.sub-date{font-size:12px;color:var(--tl)}
-.sub-det{font-size:15px;margin-bottom:4px}
-.sub-det .tg{display:inline-block;background:var(--ac);color:#fff;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:600;margin-right:4px}
-.sub-recv{font-size:13px;color:var(--tl)}
-.sub-recv strong{color:var(--tx)}
-.sub-addr{font-size:12px;color:var(--tl);margin-top:2px}
-.sub-note{font-size:12px;color:var(--ac);margin-top:2px}
-.sub-acts{display:flex;gap:6px;margin-top:8px}
-.bs{padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600}
-.be{background:var(--il);color:var(--in)}.bd{background:var(--dl);color:var(--dg)}.bst{background:var(--pl);color:var(--pd)}
+.sub-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sub-det{display:flex;align-items:center;gap:8px;font-size:15px;min-width:0}
+.sub-det b{font-weight:600}.sub-det .qt{color:var(--tl);font-variant-numeric:tabular-nums}
+.tg{font-size:11.5px;font-weight:600;color:var(--tl);border:1px solid var(--bd);border-radius:5px;padding:0 6px;height:20px;display:inline-flex;align-items:center;background:var(--sf)}
+.sub-recv{display:flex;align-items:baseline;gap:6px;font-size:14px;margin-top:8px}
+.sub-recv .k{color:var(--tl);font-size:13px}.sub-recv strong{font-weight:600}
+.sub-recv .ph{color:var(--tm);font-size:13px;font-variant-numeric:tabular-nums}
+.sub-addr{font-size:13.5px;color:var(--tl);margin-top:2px;word-break:keep-all}
+.sub-note{font-size:13px;margin-top:8px;padding:8px 10px;background:var(--sf);border:1px solid var(--bd2);border-radius:8px}
+.sub-ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;flex-wrap:wrap}
+.sub-id{font-size:12px;color:var(--tm);font-variant-numeric:tabular-nums}
+.sub-acts{display:flex;gap:6px}
+.bs{height:32px;padding:0 11px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid var(--bd);background:var(--sf);transition:background .15s,border-color .15s,filter .15s;white-space:nowrap}
+.bs:hover{border-color:var(--tm)}
+.bst{background:var(--pr);border-color:var(--pr);color:#fff}.bst:hover{filter:brightness(1.1);border-color:var(--pr)}
+.bd{color:var(--dg)}.bd:hover{background:var(--dl);border-color:var(--dl)}
 
-.es{text-align:center;padding:60px 20px;color:var(--tl)}.es .ic{font-size:48px;margin-bottom:12px}.es p{font-size:17px}
+.es{text-align:center;padding:64px 20px;color:var(--tl);background:var(--sf);border:1px dashed var(--bd);border-radius:var(--rd)}
+.es .ic{width:48px;height:48px;border-radius:14px;background:var(--bd2);color:var(--tl);display:grid;place-items:center;margin:0 auto 14px}
+.es .t{font-size:16px;font-weight:600;color:var(--tx);margin-bottom:4px}.es p{font-size:14px}.es b{color:var(--tx);font-weight:600}
 
-/* 하단 바 */
-.bb{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bd);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0));display:flex;gap:10px;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.08)}
+.bb{position:fixed;left:0;right:0;bottom:0;z-index:100;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));pointer-events:none;display:flex;justify-content:center}
 .bb.hid{display:none}
-.bsp{flex:1;background:var(--pr);color:#fff;padding:14px;border-radius:10px;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
-.cc{background:#fff;color:var(--pd);width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.bsp{pointer-events:auto;width:100%;max-width:688px;height:56px;padding:0 18px 0 12px;border-radius:16px;background:var(--tx);color:var(--bg);display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;box-shadow:0 12px 32px -10px rgba(0,0,0,.4);animation:rise .25s ease}
+.bsp-l{display:flex;align-items:center;gap:8px;font-weight:500}
+.cc{min-width:28px;height:28px;padding:0 8px;border-radius:8px;background:var(--pr);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.bsp-r{display:flex;align-items:center;gap:6px}
+@keyframes rise{from{transform:translateY(12px);opacity:0}}
 
-/* 모달 */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.mo{position:fixed;inset:0;background:rgba(18,19,17,.42);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .mo.show{opacity:1;pointer-events:auto}
-.ml{background:var(--bg);width:100%;max-width:640px;max-height:92vh;border-radius:20px 20px 0 0;overflow-y:auto;transform:translateY(100%);transition:transform .3s ease}
-.mo.show .ml{transform:translateY(0)}
-@media(min-width:768px){.mo{align-items:center}.ml{border-radius:20px;max-height:88vh}}
-.mh{position:sticky;top:0;background:var(--bg);padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd);z-index:10}
-.mh h2{font-size:20px;font-weight:700}
-.bc{width:36px;height:36px;border-radius:50%;background:var(--bd);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--tx)}
-.mb{padding:20px}.mf{position:sticky;bottom:0;background:var(--bg);padding:16px 20px;border-top:1px solid var(--bd)}
-.fc{background:var(--sf);border-radius:var(--rd);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
-.fc h3{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--pd);border-bottom:2px solid var(--pl);padding-bottom:8px}
-.fr{margin-bottom:12px}.fr label{display:block;font-size:14px;font-weight:600;color:var(--tl);margin-bottom:4px}.fr .rq{color:var(--dg)}
-.fr input,.fr select,.fr textarea{width:100%;padding:12px 14px;border:1.5px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx);outline:none;transition:border-color .2s}
-.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--pr)}
-.fr select:disabled{opacity:.45;background:#eee}.fr textarea{resize:vertical;min-height:60px}
-.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:480px){.ag{grid-template-columns:1fr}}
-.ag3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}@media(max-width:580px){.ag3{grid-template-columns:1fr}}
-.bp{width:100%;padding:16px;background:var(--pr);color:#fff;border-radius:10px;font-size:18px;font-weight:700}.bp:active{background:var(--pd)}
+.ml{background:var(--sf);width:100%;max-width:600px;max-height:92vh;border-radius:20px 20px 0 0;overflow-y:auto;overscroll-behavior:contain;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.ml.sm{max-width:440px}
+.mo.show .ml{transform:none}
+@media(min-width:768px){.mo{align-items:center;padding:24px}.ml{border-radius:20px;max-height:88vh;transform:translateY(16px) scale(.98)}}
+.mh{position:sticky;top:0;z-index:10;background:var(--sf);padding:20px 20px 12px;display:flex;justify-content:space-between;align-items:center}
+.mh h2{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.bc{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--tl);background:var(--bd2);transition:color .15s}
+.bc:hover{color:var(--tx)}
+.mb{padding:4px 20px 20px}
+.mf{position:sticky;bottom:0;background:var(--sf);padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd2)}
+.lead{font-size:14.5px;color:var(--tl);margin-bottom:16px}.lead strong{color:var(--tx)}
+.fc{padding:18px 0 6px}.fc+.fc{border-top:1px solid var(--bd2)}
+.fc h3{font-size:15px;font-weight:700;margin-bottom:14px}
+.fr{margin-bottom:14px}.fr>label{display:block;font-size:13px;font-weight:500;color:var(--tl);margin-bottom:6px}.rq{color:var(--dg);margin-left:2px}
+.fr input,.fr select,.fr textarea{width:100%;height:48px;padding:0 14px;border:1px solid var(--bd);border-radius:10px;background-color:var(--sf);font-size:16px;outline:none;transition:border-color .15s,box-shadow .15s}
+.fr select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9d96' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:36px}
+.fr textarea{height:auto;min-height:84px;padding:12px 14px;resize:vertical;line-height:1.5}
+.fr input:focus,.fr select:focus,.fr textarea:focus{border-color:var(--pr);box-shadow:var(--ring)}
+.fr select:disabled{background-color:var(--sf2);color:var(--tm);cursor:not-allowed}
+.ag{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}@media(max-width:480px){.ag{grid-template-columns:1fr}}
+.ag3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}@media(max-width:580px){.ag3{grid-template-columns:1fr}}
+.addr-hint{font-size:12.5px;color:var(--pr);margin-top:8px;font-weight:500}.addr-hint:empty{display:none}
+#sA,#rA{margin-top:8px}
+.bp{width:100%;height:52px;border-radius:12px;background:var(--pr);color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .1s,background .15s}
+.bp:hover{filter:brightness(1.1)}.bp:active{transform:scale(.985)}.bp:disabled{opacity:.5;cursor:default}
+.bp.sec{background:var(--sf);color:var(--tx);border:1px solid var(--bd)}.bp.sec:hover{filter:none;background:var(--sf2)}
+.bp.dgr{background:var(--dl);color:var(--dg)}.bp.dgr:hover{filter:none}
+.bp.s{height:44px;font-size:15px}
+.btns{display:flex;gap:8px}.btns>*{flex:1;min-width:0}
 .cl{display:flex;flex-direction:column;gap:10px}
-.ci{background:var(--sf);border:2px solid var(--bd);border-radius:var(--rd);padding:18px;text-align:center;font-size:17px;font-weight:600;transition:all .15s}
-.ci:active,.ci:hover{border-color:var(--pr);background:var(--pl)}.ci .ds{font-size:14px;color:var(--tl);font-weight:400;margin-top:4px}
-.eo{background:var(--sf);border:2px solid var(--bd);border-radius:var(--rd);padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;font-size:16px;cursor:pointer}
-.eo.sel{border-color:var(--pr);background:var(--pl)}.eo input[type=radio]{width:22px;height:22px;accent-color:var(--pr)}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--tx);color:#fff;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.addr-hint{font-size:12px;color:var(--pr);margin-top:4px;font-weight:500}
-.ocr-spinner{width:40px;height:40px;border:4px solid var(--bd);border-top-color:var(--pr);border-radius:50%;margin:0 auto;animation:spin .8s linear infinite}
+.ci{width:100%;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--bd);border-radius:var(--rd);background:var(--sf);text-align:left;transition:border-color .15s,background .15s}
+.ci:hover{border-color:var(--pr);background:var(--pl)}
+.ci-ic{width:44px;height:44px;border-radius:12px;background:var(--pl);color:var(--pr);display:grid;place-items:center;flex-shrink:0}
+.ci-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ci-tx b{font-size:16px;font-weight:600}
+.ci .ds{font-size:13.5px;color:var(--tl)}.ci-go{color:var(--tm)}
+.eo{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--bd);border-radius:var(--rd);margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.eo.sel{border-color:var(--pr);background:var(--pl);box-shadow:0 0 0 1px var(--pr)}
+.eo b{font-weight:600;display:block}.eo span{font-size:13.5px;color:var(--tl)}
+.cat-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-tab{height:52px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);font-size:16px;font-weight:600;color:var(--tl);transition:all .15s}
+.cat-tab.on{border-color:var(--pr);background:var(--pl);color:var(--pd);box-shadow:0 0 0 1px var(--pr)}
+.toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 8px 24px -6px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.cam-img{border-radius:12px;overflow:hidden;border:1px solid var(--bd);margin-bottom:16px;background:var(--sf2)}.cam-img img{width:100%;display:block;max-height:320px;object-fit:contain}
+.ocr-spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--pr);border-radius:50%;margin:0 auto;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ocr-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0}
-.ocr-row:last-child{border:none}
-.ocr-label{color:var(--tl);font-weight:600;min-width:70px}.ocr-val{color:var(--tx);text-align:right;word-break:break-all}
-.btn-sync{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.btn-sync:active{background:rgba(255,255,255,.35)}
-.btn-sync.spinning{animation:spin .8s linear infinite}
-.sheet-ok{background:var(--pl);color:var(--pd)}.sheet-no{background:#fef3e2;color:#e67e22}
-.btn-set{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:8px;font-size:20px;display:flex;align-items:center;justify-content:center;transition:background .15s}
-.btn-set:active{background:rgba(255,255,255,.35)}
-.key-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:15px;font-weight:600}
-.key-ok{background:var(--pl);color:var(--pd)}.key-no{background:var(--dl);color:var(--dg)}
-.cat-tabs{display:flex;gap:8px}
-.cat-tab{flex:1;padding:14px 10px;border-radius:10px;font-size:17px;font-weight:700;background:var(--sf);color:var(--tl);border:2px solid var(--bd);text-align:center;transition:all .15s}
-.cat-tab:active{transform:scale(.97)}
-.cat-tab.on{border-color:var(--pr);background:var(--pl);color:var(--pd)}
+.ocr-box{border:1px solid var(--bd);border-radius:12px;padding:4px 14px 6px;margin-bottom:16px}
+.ocr-box h4{font-size:13px;font-weight:600;color:var(--tl);padding:10px 0 4px}
+.ocr-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;font-size:14px}.ocr-row+.ocr-row{border-top:1px solid var(--bd2)}
+.ocr-label{color:var(--tl);flex-shrink:0}.ocr-val{text-align:right;word-break:break-all;font-weight:500}
+.key-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:14px;font-weight:500}
+.key-status .dot{background:currentColor}
+.key-ok,.sheet-ok{background:var(--pl);color:var(--pd)}.key-no{background:var(--dl);color:var(--dg)}.sheet-no{background:var(--al);color:var(--at)}
+.help{font-size:13.5px;color:var(--tl);margin-bottom:14px;line-height:1.6}
+.sheet-acts{margin-top:14px;padding-top:14px;border-top:1px solid var(--bd2)}
 </style>
 </head>
 <body>
-<div class="hd"><h1><span>🍐</span> 광진농원 주문 관리</h1><div style="display:flex;gap:8px;align-items:center"><button class="bn" onclick="showCh()">＋ 접수 신청</button><button class="btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none">🔄</button><button class="btn-set" onclick="sm('mSet')">⚙️</button></div></div>
-<div class="st" id="stats"></div>
-<div class="ls">
-  <div class="lh"><label><input type="checkbox" id="selAll" onchange="togAll()"> 전체 선택</label>
+<template id="__bundler_thumbnail" data-bg-color="#f6f5f1"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="36" width="48" height="48" rx="14" fill="#33582a"/><text x="60" y="69" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="700" fill="#fff">광</text></svg></template>
+<header class="hd"><div class="hd-in">
+  <div class="brand"><span class="mark">광</span><div><h1>광진농원</h1><p>주문 관리</p></div></div>
+  <div class="hd-act">
+    <button class="ib btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button>
+    <button class="ib btn-set" onclick="sm('mSet')" title="설정"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
+    <button class="bn" onclick="showCh()"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>접수</button>
+  </div>
+</div></header>
+<main class="wrap">
+  <div class="st" id="stats"></div>
+  <div class="lh"><label class="chk"><input type="checkbox" id="selAll" onchange="togAll()">전체 선택</label>
     <div class="fb"><button class="ft on" onclick="filt('all',this)">전체</button><button class="ft" onclick="filt('접수',this)">접수</button><button class="ft" onclick="filt('접수완료',this)">접수완료</button></div>
   </div>
   <div id="olist"></div>
-</div>
-<div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()">📦 택배 전달 <span class="cc" id="cCnt">0</span></button></div>
+</main>
+<div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>
 
-<!-- 접수 방식 선택 -->
-<div class="mo" id="mCh"><div class="ml" style="max-width:440px"><div class="mh"><h2>접수 방식 선택</h2><button class="bc" onclick="cm('mCh')">✕</button></div><div class="mb"><div class="cl">
-  <button class="ci" onclick="cm('mCh');openForm()">📝 주문서 신규 작성<div class="ds">직접 정보를 입력합니다</div></button>
-  <button class="ci" onclick="cm('mCh');openCam()">📷 촬영 후 주문 작성<div class="ds">사진 촬영 후 정보를 입력합니다</div></button>
+<div class="mo" id="mCh"><div class="ml sm"><div class="mh"><h2>접수 방식 선택</h2><button class="bc" onclick="cm('mCh')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb"><div class="cl">
+  <button class="ci" onclick="cm('mCh');openForm()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="ci-tx"><b>직접 작성</b><span class="ds">주문 정보를 직접 입력합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+  <button class="ci" onclick="cm('mCh');openCam()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진으로 작성</b><span class="ds">주문서 사진에서 정보를 자동 인식합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
 </div></div></div></div>
 
-<!-- 주문서 폼 -->
 <div class="mo" id="mForm"><div class="ml">
-  <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')">✕</button></div>
+  <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
-    <div class="fc"><h3>🍐 주문 정보</h3>
+    <div class="fc"><h3>주문 정보</h3>
       <div class="fr"><label>상품 구분 <span class="rq">*</span></label>
         <div class="cat-tabs" id="catTabs">
-          <button type="button" class="cat-tab" data-cat="배" onclick="pickCat('배')">🍐 배</button>
-          <button type="button" class="cat-tab" data-cat="배즙" onclick="pickCat('배즙')">🧃 배즙</button>
+          <button type="button" class="cat-tab" data-cat="배" onclick="pickCat('배')">배</button>
+          <button type="button" class="cat-tab" data-cat="배즙" onclick="pickCat('배즙')">배즙</button>
         </div>
       </div>
       <div class="ag">
@@ -153,111 +195,79 @@ button{cursor:pointer;font-family:inherit;font-size:16px;border:none}input,selec
         <div class="fr"><label id="fQLabel">수량 <span class="rq">*</span></label><select id="fQ" onchange="customSel(this,'수량을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
       </div>
     </div>
-    <div class="fc"><h3>📤 보내는 사람</h3>
+    <div class="fc"><h3>보내는 사람</h3>
       <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
       <div class="fr"><label>주소</label>
-        <div class="ag3" style="margin-bottom:8px"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
+        <div class="ag3"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="sHint"></div>
-        <input id="sA" placeholder="상세주소 직접 입력" style="margin-top:6px">
+        <input id="sA" placeholder="상세주소">
       </div>
     </div>
-    <div class="fc"><h3>📥 받는 사람</h3>
+    <div class="fc"><h3>받는 사람</h3>
       <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
       <div class="fr"><label>주소 <span class="rq">*</span></label>
-        <div class="ag3" style="margin-bottom:8px"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
+        <div class="ag3"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="rHint"></div>
-        <input id="rA" placeholder="상세주소 직접 입력" style="margin-top:6px">
+        <input id="rA" placeholder="상세주소">
       </div>
-      <div class="fr"><label>비고</label><textarea id="rNo" placeholder="배송 메모"></textarea></div>
+      <div class="fr"><label>배송 메모</label><textarea id="rNo" placeholder="예) 부재 시 경비실에 맡겨주세요"></textarea></div>
     </div>
   </div>
-  <div class="mf"><button class="bp" onclick="saveO()">💾 저장하기</button></div>
+  <div class="mf"><button class="bp" onclick="saveO()">저장하기</button></div>
 </div></div>
 
-<!-- 이메일 -->
-<div class="mo" id="mEm"><div class="ml" style="max-width:440px"><div class="mh"><h2>📦 택배 전달</h2><button class="bc" onclick="cm('mEm')">✕</button></div><div class="mb">
-  <p style="margin-bottom:14px;color:var(--tl);font-size:15px">선택한 주문 <strong id="eCnt">0</strong>건을 메일로 전달합니다.</p>
-  <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><strong>광진</strong><br><span style="font-size:14px;color:var(--tl)">gwang-jin@naver.com</span></div></label>
-  <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><strong>명진</strong><br><span style="font-size:14px;color:var(--tl)">santar7021@gmail.com</span></div></label>
-</div><div class="mf"><button class="bp" onclick="doEm()">✉️ 메일 보내기</button></div></div></div>
+<div class="mo" id="mEm"><div class="ml sm"><div class="mh"><h2>택배 전달</h2><button class="bc" onclick="cm('mEm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">
+  <p class="lead">선택한 주문 <strong id="eCnt">0</strong>건을 메일로 전달합니다.</p>
+  <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><b>광진</b><span>gwang-jin@naver.com</span></div></label>
+  <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><b>명진</b><span>santar7021@gmail.com</span></div></label>
+</div><div class="mf"><button class="bp" onclick="doEm()">메일 보내기</button></div></div></div>
 
-<!-- 카메라 -->
-<div class="mo" id="mCam"><div class="ml" style="max-width:480px">
-  <div class="mh"><h2>📷 촬영 후 주문 작성</h2><button class="bc" onclick="cm('mCam')">✕</button></div>
+<div class="mo" id="mCam"><div class="ml sm">
+  <div class="mh"><h2>사진으로 작성</h2><button class="bc" onclick="cm('mCam')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
-    <!-- 1단계: 촬영/갤러리 선택 -->
     <div id="camStep1">
-      <p style="margin-bottom:14px;color:var(--tl);font-size:15px;text-align:center">주문서 사진을 선택하면 정보를 자동으로 인식합니다.</p>
+      <p class="lead">주문서 사진을 선택하면 정보를 자동으로 인식합니다.</p>
       <input type="file" accept="image/*" capture="environment" id="camInPhoto" style="display:none" onchange="camSelected(event)">
       <input type="file" accept="image/*" id="camInGallery" style="display:none" onchange="camSelected(event)">
       <div class="cl">
-        <button class="ci" onclick="document.getElementById('camInPhoto').click()">📷 사진 촬영<div class="ds">카메라로 주문서를 직접 촬영합니다</div></button>
-        <button class="ci" onclick="document.getElementById('camInGallery').click()">🖼️ 갤러리에서 선택<div class="ds">저장된 사진에서 주문서를 선택합니다</div></button>
+        <button class="ci" onclick="document.getElementById('camInPhoto').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진 촬영</b><span class="ds">카메라로 주문서를 촬영합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button class="ci" onclick="document.getElementById('camInGallery').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.75"/><path d="m20.5 15.5-4.5-4.5-9 8.5"/></svg></span><span class="ci-tx"><b>갤러리에서 선택</b><span class="ds">저장된 사진을 불러옵니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
       </div>
     </div>
-    <!-- 2단계: 미리보기 + 인식 -->
     <div id="camStep2" style="display:none">
-      <div style="border-radius:12px;overflow:hidden;border:2px solid var(--bd);margin-bottom:16px">
-        <img id="camImg" style="width:100%;display:block">
-      </div>
-      <div id="ocrStatus" style="display:none;text-align:center;padding:20px">
+      <div class="cam-img"><img id="camImg" alt=""></div>
+      <div id="ocrStatus" style="display:none;text-align:center;padding:16px 0 24px">
         <div class="ocr-spinner"></div>
-        <p style="margin-top:12px;font-size:16px;font-weight:600;color:var(--pr)">주문 정보를 인식하고 있습니다...</p>
-        <p style="font-size:13px;color:var(--tl);margin-top:4px">잠시만 기다려주세요</p>
+        <p style="margin-top:14px;font-size:15px;font-weight:600">주문 정보를 인식하고 있습니다</p>
+        <p style="font-size:13px;color:var(--tl);margin-top:2px">잠시만 기다려주세요</p>
       </div>
-      <div id="ocrResult" style="display:none">
-        <div class="fc" style="margin-bottom:12px">
-          <h3 style="font-size:15px;border:none;padding:0;margin-bottom:10px">📋 인식된 정보</h3>
-          <div id="ocrPreview" style="font-size:14px;line-height:1.8"></div>
-        </div>
-      </div>
-      <div class="ag" style="gap:10px">
-        <button class="bp" style="background:var(--bd);color:var(--tx)" onclick="camReset()">↩ 다시 선택</button>
-        <button class="bp" id="btnOcrApply" onclick="applyOcr()">✅ 주문서에 적용</button>
+      <div id="ocrResult" style="display:none"><div class="ocr-box"><h4>인식된 정보</h4><div id="ocrPreview"></div></div></div>
+      <div class="btns">
+        <button class="bp sec" onclick="camReset()">다시 선택</button>
+        <button class="bp" id="btnOcrApply" onclick="applyOcr()">주문서에 적용</button>
       </div>
     </div>
   </div>
 </div></div>
 
-<!-- 설정 -->
-<div class="mo" id="mSet"><div class="ml" style="max-width:480px">
-  <div class="mh"><h2>⚙️ 설정</h2><button class="bc" onclick="cm('mSet')">✕</button></div>
+<div class="mo" id="mSet"><div class="ml sm">
+  <div class="mh"><h2>설정</h2><button class="bc" onclick="cm('mSet')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
     <div class="fc">
-      <h3>🔑 API 키 설정</h3>
+      <h3>API 키</h3>
       <div id="keyStatus"></div>
-      <p style="font-size:14px;color:var(--tl);margin-bottom:12px;line-height:1.5">
-        HTML 파일을 독립 실행할 때 사진 인식(OCR) 기능을 사용하려면 Anthropic API 키가 필요합니다.
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--in)">API 키 발급 →</a>
-      </p>
-      <div class="fr">
-        <label>API Key</label>
-        <input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." style="font-size:15px;letter-spacing:1px">
-      </div>
-      <div class="ag" style="gap:10px;margin-top:4px">
-        <button class="bp" onclick="saveApiKey()">💾 저장</button>
-        <button class="bp" style="background:var(--dg)" onclick="clearApiKey()">🗑️ 삭제</button>
-      </div>
+      <p class="help">HTML 파일을 독립 실행할 때 사진 인식(OCR)을 사용하려면 Anthropic API 키가 필요합니다. <a href="https://console.anthropic.com/settings/keys" target="_blank">API 키 발급 →</a></p>
+      <div class="fr"><label>API Key</label><input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." style="letter-spacing:.5px"></div>
+      <div class="btns"><button class="bp s" onclick="saveApiKey()">저장</button><button class="bp s dgr" onclick="clearApiKey()">삭제</button></div>
     </div>
     <div class="fc">
-      <h3>📊 구글 스프레드시트 연동</h3>
+      <h3>구글 스프레드시트 연동</h3>
       <div id="sheetStatus"></div>
-      <p style="font-size:14px;color:var(--tl);margin-bottom:12px;line-height:1.5">
-        구글 스프레드시트에 주문 데이터를 저장하면 여러 기기에서 동일한 데이터를 공유할 수 있습니다.
-      </p>
-      <div class="fr">
-        <label>Apps Script 웹앱 URL</label>
-        <input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/..." style="font-size:14px">
-      </div>
-      <div class="ag" style="gap:10px;margin-top:4px">
-        <button class="bp" onclick="saveSheetUrl()">💾 저장</button>
-        <button class="bp" style="background:var(--dg)" onclick="clearSheetUrl()">🗑️ 해제</button>
-      </div>
-      <div id="sheetActions" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">
-        <div class="ag" style="gap:10px">
-          <button class="bp" style="background:var(--in)" onclick="syncFromSheet()">📥 스프레드시트에서 불러오기</button>
-          <button class="bp" style="background:var(--ac)" onclick="syncToSheet()">📤 스프레드시트로 보내기</button>
-        </div>
+      <p class="help">스프레드시트에 주문을 저장하면 여러 기기에서 같은 데이터를 공유할 수 있습니다.</p>
+      <div class="fr"><label>Apps Script 웹앱 URL</label><input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/..." style="font-size:15px"></div>
+      <div class="btns"><button class="bp s" onclick="saveSheetUrl()">저장</button><button class="bp s dgr" onclick="clearSheetUrl()">해제</button></div>
+      <div id="sheetActions" class="sheet-acts" style="display:none">
+        <div class="btns"><button class="bp s sec" onclick="syncFromSheet()">불러오기</button><button class="bp s sec" onclick="syncToSheet()">보내기</button></div>
       </div>
     </div>
   </div>
@@ -293,10 +303,10 @@ function last4(ph){const d=ph.replace(/[^0-9]/g,'');return d.slice(-4)}
 
 // ===== 주소 =====
 function initA(){['s','r'].forEach(p=>{const d=document.getElementById(p+'D');Object.keys(A).sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;d.appendChild(o)})})}
-function onDo(p){const pv=document.getElementById(p+'D').value;const ce=document.getElementById(p+'C'),se=document.getElementById(p+'G');ce.innerHTML='<option value="">시/군/구</option>';se.innerHTML='<option value="">구/읍면동</option>';se.disabled=true;document.getElementById(p+'Hint').textContent='';if(!pv){ce.disabled=true;return}ce.disabled=false;Object.keys(A[pv]||{}).sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;ce.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='✏️ 직접입력';ce.appendChild(oi)}
-function onCi(p){const pv=document.getElementById(p+'D').value,cv=document.getElementById(p+'C').value;const se=document.getElementById(p+'G');se.innerHTML='<option value="">구/읍면동</option>';document.getElementById(p+'Hint').textContent='';if(cv==='__i__'){se.disabled=true;const v=prompt('시/군/구 입력:');if(v){const s=document.getElementById(p+'C');const o=document.createElement('option');o.value=v;o.textContent=v;s.insertBefore(o,s.lastChild);s.value=v}else document.getElementById(p+'C').value='';return}if(!cv){se.disabled=true;return}const subs=A[pv]?.[cv]||[];if(!subs.length){se.disabled=true;return}se.disabled=false;subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;se.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='✏️ 직접입력';se.appendChild(oi);updateHint(p)}
+function onDo(p){const pv=document.getElementById(p+'D').value;const ce=document.getElementById(p+'C'),se=document.getElementById(p+'G');ce.innerHTML='<option value="">시/군/구</option>';se.innerHTML='<option value="">구/읍면동</option>';se.disabled=true;document.getElementById(p+'Hint').textContent='';if(!pv){ce.disabled=true;return}ce.disabled=false;Object.keys(A[pv]||{}).sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;ce.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='직접 입력';ce.appendChild(oi)}
+function onCi(p){const pv=document.getElementById(p+'D').value,cv=document.getElementById(p+'C').value;const se=document.getElementById(p+'G');se.innerHTML='<option value="">구/읍면동</option>';document.getElementById(p+'Hint').textContent='';if(cv==='__i__'){se.disabled=true;const v=prompt('시/군/구 입력:');if(v){const s=document.getElementById(p+'C');const o=document.createElement('option');o.value=v;o.textContent=v;s.insertBefore(o,s.lastChild);s.value=v}else document.getElementById(p+'C').value='';return}if(!cv){se.disabled=true;return}const subs=A[pv]?.[cv]||[];if(!subs.length){se.disabled=true;return}se.disabled=false;subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;se.appendChild(o)});const oi=document.createElement('option');oi.value='__i__';oi.textContent='직접 입력';se.appendChild(oi);updateHint(p)}
 function onSub(el){const p=el.id.charAt(0);if(el.value==='__i__'){const v=prompt('읍/면/동 입력:');if(v){const o=document.createElement('option');o.value=v;o.textContent=v;el.insertBefore(o,el.lastChild);el.value=v}else el.value=''}updateHint(p)}
-function updateHint(p){const parts=[document.getElementById(p+'D').value,document.getElementById(p+'C').value,document.getElementById(p+'G').value].filter(v=>v&&v!=='__i__');document.getElementById(p+'Hint').textContent=parts.length?'📍 '+parts.join(' > '):''}
+function updateHint(p){const parts=[document.getElementById(p+'D').value,document.getElementById(p+'C').value,document.getElementById(p+'G').value].filter(v=>v&&v!=='__i__');document.getElementById(p+'Hint').textContent=parts.length?parts.join(' › '):''}
 let curCat='';
 const CAT_DATA={
   '배':{varieties:['만풍','신고','추황','황금'],qtyLabel:'과수 (kg)',qtys:['8','9','10','11','12','13']},
@@ -310,12 +320,12 @@ function pickCat(cat){
   // 품종
   fv.innerHTML='<option value="">선택</option>';
   d.varieties.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;fv.appendChild(o)});
-  fv.innerHTML+='<option value="__i__">✏️ 직접입력</option>';
+  fv.innerHTML+='<option value="__i__">직접 입력</option>';
   // 수량
   document.getElementById('fQLabel').innerHTML=d.qtyLabel+' <span class="rq">*</span>';
   fq.innerHTML='<option value="">선택</option>';
   d.qtys.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;fq.appendChild(o)});
-  fq.innerHTML+='<option value="__i__">✏️ 직접입력</option>';
+  fq.innerHTML+='<option value="__i__">직접 입력</option>';
 }
 function customSel(el,msg){if(el.value!=='__i__')return;const v=prompt(msg);if(v&&v.trim()){const o=document.createElement('option');o.value=v.trim();o.textContent=v.trim();el.insertBefore(o,el.querySelector('[value="__i__"]'));el.value=v.trim()}else el.value=''}
 function ensureOpt(sel,val){if(!val)return;for(let i=0;i<sel.options.length;i++)if(sel.options[i].value===val)return;const o=document.createElement('option');o.value=val;o.textContent=val;sel.insertBefore(o,sel.querySelector('[value="__i__"]'));} 
@@ -323,77 +333,64 @@ function fmtP(el){let v=el.value.replace(/[^0-9]/g,'');if(v.length>3&&v.length<=
 
 // ===== 렌더링 =====
 function render(){rStats();rList();uBB()}
+const IC={chev:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',box:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>'};
 function rStats(){
   const t=O.length,a=O.filter(o=>o.st==='접수').length,b=O.filter(o=>o.st==='접수완료').length;
-  // 보내는사람 기준 그룹 수
-  const grps=new Set(O.map(senderKey));
-  document.getElementById('stats').innerHTML=`
-    <div class="sc"><div class="n">${t}</div><div class="l">전체 주문</div></div>
-    <div class="sc"><div class="n" style="color:var(--ac)">${grps.size}</div><div class="l">주문자 수</div></div>
-    <div class="sc"><div class="n" style="color:var(--in)">${a}</div><div class="l">접수</div></div>
-    <div class="sc"><div class="n" style="color:var(--pr)">${b}</div><div class="l">접수완료</div></div>`;
+  const g=new Set(O.map(senderKey)).size;
+  document.getElementById('stats').innerHTML=[[t,'전체 주문',''],[g,'주문자',''],[a,'접수','pend'],[b,'접수완료','done']].map(([n,l,c])=>`<div class="sc"><div class="l">${c?`<i class="dot ${c}"></i>`:''}${l}</div><div class="n">${n}</div></div>`).join('');
 }
 function rList(){
   const el=document.getElementById('olist');
   let filtered=CF==='all'?[...O]:O.filter(o=>o.st===CF);
-  if(!filtered.length){el.innerHTML='<div class="es"><div class="ic">📋</div><p>등록된 주문이 없습니다.<br>"접수 신청" 버튼으로 추가하세요.</p></div>';return}
-
-  // 보내는 사람 기준 그룹핑
+  if(!filtered.length){el.innerHTML=`<div class="es"><div class="ic">${IC.box}</div><p class="t">등록된 주문이 없습니다</p><p>상단의 <b>접수</b> 버튼으로 주문을 추가하세요.</p></div>`;return}
   const groups={};
   filtered.forEach(o=>{const k=senderKey(o);if(!groups[k])groups[k]=[];groups[k].push(o)});
-
-  // 그룹별 최신 주문 기준 정렬
   const sortedKeys=Object.keys(groups).sort((a,b)=>{
     const la=groups[a].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
     const lb=groups[b].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
     return lb-la;
   });
-
   el.innerHTML=sortedKeys.map(k=>{
     const items=groups[k].sort((a,b)=>new Date(b.ca)-new Date(a.ca));
-    const first=items[0];
-    const nm=first.s.nm;
-    const ph4=last4(first.s.ph);
-    const isOpen=openGrps.has(k);
-    const allIds=items.map(o=>o.id);
-    const allChecked=allIds.every(id=>CK.has(id));
-    const 접수cnt=items.filter(o=>o.st==='접수').length;
-    const 완료cnt=items.filter(o=>o.st==='접수완료').length;
-
+    const first=items[0],nm=first.s.nm,ph4=last4(first.s.ph),isOpen=openGrps.has(k);
+    const allChecked=items.every(o=>CK.has(o.id));
+    const 접수cnt=items.filter(o=>o.st==='접수').length,완료cnt=items.filter(o=>o.st==='접수완료').length;
+    const d0=new Date(first.ca);
+    const dstr=String(d0.getFullYear()).slice(2)+'.'+Z(d0.getMonth()+1)+'.'+Z(d0.getDate())+' '+Z(d0.getHours())+':'+Z(d0.getMinutes());
     let badges='';
     if(접수cnt)badges+=`<span class="badge b접수">접수 ${접수cnt}</span>`;
     if(완료cnt)badges+=`<span class="badge b접수완료">완료 ${완료cnt}</span>`;
-
     const subHtml=items.map(o=>{
       const d=new Date(o.ca);
       const ds=`${d.getMonth()+1}/${d.getDate()} ${Z(d.getHours())}:${Z(d.getMinutes())}`;
       const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
-      const ck=CK.has(o.id);
-      return`<div class="sub-order" style="${ck?'background:var(--pl)':''}">
+      const ck=CK.has(o.id),unit=o.cat==='배즙'?'박스':'kg',pend=o.st==='접수';
+      return`<div class="sub-order ${ck?'on':''}">
         <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
         <div class="sub-info">
-          <div class="sub-top"><span class="sub-id">#${o.id.slice(-4).toUpperCase()}</span><span class="badge b${o.st}">${o.st}</span><span class="sub-date">${ds}</span></div>
-          <div class="sub-det"><span class="tg">${o.cat==='배즙'?'🧃':'🍐'} ${o.va}</span> ${o.qt}${o.cat==='배즙'?'박스':'kg'}</div>
-          <div class="sub-recv">받는 분: <strong>${o.r.nm}</strong> (${last4(o.r.ph)})</div>
-          ${ra?`<div class="sub-addr">📍 ${ra}</div>`:''}
-          ${o.r.no?`<div class="sub-note">💬 ${o.r.no}</div>`:''}
-          <div class="sub-acts">
-            <button class="bs bst" onclick="event.stopPropagation();cyc('${o.id}')">${o.st==='접수'?'▸ 접수완료':'↩ 접수'}</button>
-            <button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>
-            <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
+          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b><span class="qt">${o.qt}${unit}</span></div><span class="badge b${o.st}">${o.st}</span></div>
+          <div class="sub-recv"><span class="k">받는 분</span><strong>${o.r.nm}</strong><span class="ph">${last4(o.r.ph)}</span></div>
+          ${ra?`<div class="sub-addr">${ra}</div>`:''}
+          ${o.r.no?`<div class="sub-note">${o.r.no}</div>`:''}
+          <div class="sub-ft"><span class="sub-id">#${o.id.slice(-4).toUpperCase()} · ${ds}</span>
+            <div class="sub-acts">
+              <button class="bs ${pend?'bst':''}" onclick="event.stopPropagation();cyc('${o.id}')">${pend?'완료 처리':'접수로 되돌리기'}</button>
+              <button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>
+              <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
+            </div>
           </div>
         </div>
       </div>`;
     }).join('');
-
     return`<div class="grp ${allChecked?'ck':''}">
       <div class="grp-hd" onclick="togGrp('${k}')">
         <input type="checkbox" ${allChecked?'checked':''} onclick="event.stopPropagation()" onchange="togGrpCk('${k}',this.checked)">
         <div class="grp-info">
-          <div><span class="grp-sender">${nm}</span> <span class="grp-phone">(${ph4})</span> <span class="grp-date">${(()=>{const d=new Date(first.ca);return String(d.getFullYear()).slice(2)+'.'+Z(d.getMonth()+1)+'.'+Z(d.getDate())+' '+Z(d.getHours())+':'+Z(d.getMinutes())})()}</span></div>
-          <div class="grp-right"><span class="grp-cnt">${items.length}건</span><div class="grp-badges">${badges}</div></div>
+          <div class="grp-l"><div class="grp-name"><span class="grp-sender">${nm}</span><span class="grp-phone">${ph4}</span></div>
+            <div class="grp-meta"><span>${items.length}건</span><span class="sep"></span><span class="grp-date">${dstr}</span></div></div>
+          <div class="grp-badges">${badges}</div>
         </div>
-        <span class="grp-arrow ${isOpen?'open':''}">▼</span>
+        <span class="grp-arrow ${isOpen?'open':''}">${IC.chev}</span>
       </div>
       <div class="grp-body ${isOpen?'open':''}">${subHtml}</div>
     </div>`;
@@ -487,7 +484,7 @@ function camSelected(e){
     document.getElementById('camStep1').style.display='none';
     document.getElementById('camStep2').style.display='';
     document.getElementById('ocrResult').style.display='none';
-    document.getElementById('btnOcrApply').textContent='✅ 주문서에 적용';
+    document.getElementById('btnOcrApply').textContent='주문서에 적용';
     runOcr(ocrB64);
   };reader.readAsDataURL(f);
 }
@@ -548,8 +545,8 @@ function showOcrResult(d){
     ['상품',d.product],['수량',d.quantity],['비고',d.note]
   ].filter(r=>r[1]);
   document.getElementById('ocrPreview').innerHTML=rows.map(r=>`<div class="ocr-row"><span class="ocr-label">${r[0]}</span><span class="ocr-val">${r[1]}</span></div>`).join('');
-  if(rows.length)document.getElementById('btnOcrApply').textContent='✅ 인식 정보로 주문서 작성';
-  else document.getElementById('btnOcrApply').textContent='✅ 주문서 직접 작성';
+  if(rows.length)document.getElementById('btnOcrApply').textContent='인식 정보로 작성';
+  else document.getElementById('btnOcrApply').textContent='직접 작성하기';
 }
 function applyOcr(){
   cm('mCam');openForm();
@@ -599,8 +596,8 @@ function clearApiKey(){
 function updateKeyStatus(){
   const k=getApiKey();
   const el=document.getElementById('keyStatus');
-  if(k){el.innerHTML=`<div class="key-status key-ok">✅ API 키가 설정되어 있습니다 (${k.slice(0,12)}...)</div>`}
-  else{el.innerHTML=`<div class="key-status key-no">⚠️ API 키가 설정되지 않았습니다</div>`}
+  if(k){el.innerHTML=`<div class="key-status key-ok"><i class="dot"></i>API 키가 설정되어 있습니다 (${k.slice(0,12)}...)</div>`}
+  else{el.innerHTML=`<div class="key-status key-no"><i class="dot"></i>API 키가 설정되지 않았습니다</div>`}
 }
 // ===== 구글 스프레드시트 연동 =====
 function getSheetUrl(){try{return localStorage.getItem('pearSheetUrl')||''}catch(e){return ''}}
@@ -623,10 +620,10 @@ function updateSheetStatus(){
   const acts=document.getElementById('sheetActions');
   const btn=document.getElementById('btnSync');
   if(u){
-    el.innerHTML=`<div class="key-status sheet-ok">✅ 스프레드시트가 연결되어 있습니다</div>`;
+    el.innerHTML=`<div class="key-status sheet-ok"><i class="dot"></i>스프레드시트가 연결되어 있습니다</div>`;
     acts.style.display='';btn.style.display='flex';
   }else{
-    el.innerHTML=`<div class="key-status sheet-no">⚠️ 스프레드시트가 연결되지 않았습니다</div>`;
+    el.innerHTML=`<div class="key-status sheet-no"><i class="dot"></i>스프레드시트가 연결되지 않았습니다</div>`;
     acts.style.display='none';btn.style.display='none';
   }
 }
