@@ -157,6 +157,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 </style>
 </head>
 <body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <template id="__bundler_thumbnail" data-bg-color="#f6f5f1"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><rect x="36" y="36" width="48" height="48" rx="14" fill="#33582a"/><text x="60" y="69" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="700" fill="#fff">광</text></svg></template>
 <header class="hd"><div class="hd-in">
   <div class="brand"><span class="mark">광</span><div><h1>광진농원</h1><p>주문 관리</p></div></div>
@@ -217,10 +218,15 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 </div></div>
 
 <div class="mo" id="mEm"><div class="ml sm"><div class="mh"><h2>택배 전달</h2><button class="bc" onclick="cm('mEm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">
-  <p class="lead">선택한 주문 <strong id="eCnt">0</strong>건을 메일로 전달합니다.</p>
+  <p class="lead">선택한 주문 <strong id="eCnt">0</strong>건을 엑셀 파일과 함께 메일로 전달합니다.</p>
   <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><b>광진</b><span>gwang-jin@naver.com</span></div></label>
   <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><b>명진</b><span>santar7021@gmail.com</span></div></label>
-</div><div class="mf"><button class="bp" onclick="doEm()">메일 보내기</button></div></div></div>
+</div><div class="mf">
+  <div class="btns" style="flex-direction:column;gap:10px">
+    <button class="bp" id="btnEmSend" onclick="doEmAuto()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>엑셀 첨부 메일 발송</button>
+    <button class="bp sec" onclick="doEmManual()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>엑셀 다운로드 후 직접 발송</button>
+  </div>
+</div></div></div>
 
 <div class="mo" id="mCam"><div class="ml sm">
   <div class="mh"><h2>사진으로 작성</h2><button class="bc" onclick="cm('mCam')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -458,7 +464,71 @@ function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o
 
 function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
-function doEm(){if(SE===null)return toast('받는 분 선택');const ck=O.filter(o=>CK.has(o.id));const su=encodeURIComponent(`[배 농장] 택배 전달 (${ck.length}건)`);let b='택배 전달 요청\n\n';ck.forEach((o,i)=>{const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');b+=`[${i+1}] ${o.va} ${o.qt}kg\n   보내는 분: ${o.s.nm} (${o.s.ph})\n   받는 분: ${o.r.nm} (${o.r.ph})\n   주소: ${ra}\n`;if(o.r.no)b+=`   비고: ${o.r.no}\n`;b+='\n'});window.open(`mailto:${EM[SE]}?subject=${su}&body=${encodeURIComponent(b)}`,'_blank');cm('mEm');toast(`${EN[SE]}님에게 전달`)}
+// ===== 엑셀 생성 =====
+function buildExcelData(orders){
+  const rows=[['No','상품구분','품종','수량','단위','보내는분_성명','보내는분_연락처','보내는분_주소','받는분_성명','받는분_연락처','받는분_주소','배송메모','접수일시','상태']];
+  orders.forEach((o,i)=>{
+    const sA=[o.s.pv,o.s.ci,o.s.su,o.s.dt].filter(Boolean).join(' ');
+    const rA=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
+    const unit=o.cat==='배즙'?'박스':'kg';
+    rows.push([i+1,o.cat||'배',o.va,o.qt,unit,o.s.nm,o.s.ph,sA,o.r.nm,o.r.ph,rA,o.r.no||'',o.ca?new Date(o.ca).toLocaleString('ko-KR'):'',o.st]);
+  });
+  return rows;
+}
+function makeExcelBlob(orders){
+  const data=buildExcelData(orders);
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  // 열 너비 설정
+  ws['!cols']=[{wch:4},{wch:8},{wch:8},{wch:6},{wch:5},{wch:10},{wch:15},{wch:30},{wch:10},{wch:15},{wch:30},{wch:20},{wch:18},{wch:8}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'주문내역');
+  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  return new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function excelFileName(){
+  const d=new Date();
+  return `광진농원_주문_${d.getFullYear()}${Z(d.getMonth()+1)}${Z(d.getDate())}_${Z(d.getHours())}${Z(d.getMinutes())}.xlsx`;
+}
+function downloadExcel(orders){
+  const blob=makeExcelBlob(orders);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=excelFileName();
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 엑셀 첨부 자동 메일 발송 (Apps Script 경유)
+async function doEmAuto(){
+  if(SE===null)return toast('받는 분을 선택해주세요');
+  const ck=O.filter(o=>CK.has(o.id));if(!ck.length)return;
+  const u=getSheetUrl();
+  if(!u){toast('설정에서 스프레드시트 URL을 먼저 등록해주세요');return}
+  const btn=document.getElementById('btnEmSend');
+  btn.disabled=true;btn.textContent='발송 중...';
+  try{
+    const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'sendEmail',orders:ck,toEmail:EM[SE],toName:EN[SE]})});
+    const data=await r.json();
+    if(data.ok){
+      toast(`${EN[SE]}님에게 엑셀 첨부 메일 발송 완료 (${ck.length}건)`);
+      // 발송 후 상태를 접수완료로 변경
+      ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
+      sv();render();cm('mEm');
+    }else{toast('발송 실패: '+(data.error||'알 수 없음'))}
+  }catch(err){console.error(err);toast('메일 발송 실패 — 엑셀 다운로드를 이용해주세요')}
+  btn.disabled=false;btn.innerHTML='<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>엑셀 첨부 메일 발송';
+}
+
+// 엑셀 다운로드 + Gmail 열기 (수동 첨부)
+function doEmManual(){
+  if(SE===null)return toast('받는 분을 선택해주세요');
+  const ck=O.filter(o=>CK.has(o.id));if(!ck.length)return;
+  downloadExcel(ck);
+  const su=encodeURIComponent(`[광진농원] 택배 전달 (${ck.length}건)`);
+  const body=encodeURIComponent(`안녕하세요, 광진농원입니다.\n\n택배 전달 주문 ${ck.length}건을 첨부합니다.\n다운로드된 엑셀 파일을 첨부해주세요.\n\n감사합니다.`);
+  window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su}&body=${body}`,'_blank');
+  cm('mEm');toast('엑셀 다운로드 완료 — Gmail에서 파일을 첨부해주세요');
+}
 
 let ocrData=null,ocrB64='';
 function openCam(){
