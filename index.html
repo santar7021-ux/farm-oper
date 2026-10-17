@@ -281,7 +281,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
     <div class="fc">
       <h3>구글 스프레드시트 연동</h3>
       <div id="sheetStatus"></div>
-      <p class="help">스프레드시트에 주문을 저장하면 여러 기기에서 같은 데이터를 공유할 수 있습니다.</p>
+      <p class="help">스프레드시트를 연결하면 어느 기기·URL에서 접속해도 동일한 주문 데이터가 자동 동기화됩니다. 페이지를 열 때마다 최신 데이터를 불러옵니다.</p>
       <div class="fr"><label>Apps Script 웹앱 URL</label><input id="sheetUrlInput" type="url" placeholder="https://script.google.com/macros/s/..." style="font-size:15px"></div>
       <div class="btns"><button class="bp s" onclick="saveSheetUrl()">저장</button><button class="bp s dgr" onclick="clearSheetUrl()">해제</button></div>
       <div id="sheetActions" class="sheet-acts" style="display:none">
@@ -724,7 +724,11 @@ function camSave(){
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
 // ===== 구글 스프레드시트 연동 =====
-function getSheetUrl(){try{return localStorage.getItem('pearSheetUrl')||''}catch(e){return ''}}
+// 기본 스프레드시트 URL (코드에 내장 — 어느 URL에서 열어도 동기화)
+const DEFAULT_SHEET_URL=localStorage.getItem('pearSheetUrl')||'';
+function getSheetUrl(){
+  try{return localStorage.getItem('pearSheetUrl')||DEFAULT_SHEET_URL}catch(e){return DEFAULT_SHEET_URL}
+}
 function saveSheetUrl(){
   const u=document.getElementById('sheetUrlInput').value.trim();
   if(!u)return toast('URL을 입력해주세요');
@@ -786,8 +790,29 @@ async function sheetDelete(id){
 }
 
 initA();ld();render();updateSheetStatus();
-// 스프레드시트 연결 시 자동 불러오기
-if(getSheetUrl())syncFromSheet();
+// 구글 시트 연결 시 자동 동기화 (시트 데이터 우선)
+(async function(){
+  const u=getSheetUrl();
+  if(!u)return;
+  try{
+    const btn=document.getElementById('btnSync');btn.classList.add('spinning');
+    const r=await fetch(u);const data=await r.json();
+    if(Array.isArray(data)&&data.length>0){
+      // 시트 데이터와 로컬 데이터 병합 (시트 우선, 로컬에만 있는 건 추가)
+      const sheetIds=new Set(data.map(o=>o.id));
+      const localOnly=O.filter(o=>!sheetIds.has(o.id));
+      O=[...data,...localOnly];
+      sv();render();
+      // 로컬에만 있던 건을 시트에도 추가
+      for(const o of localOnly){await sheetAdd(o)}
+      if(localOnly.length)toast(`동기화 완료 (시트 ${data.length}건 + 로컬 ${localOnly.length}건 병합)`);
+    }else if(Array.isArray(data)&&data.length===0&&O.length>0){
+      // 시트가 비어있고 로컬에 데이터가 있으면 시트로 전송
+      await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'sync',orders:O})});
+    }
+    btn.classList.remove('spinning');
+  }catch(err){console.error('Auto sync failed:',err)}
+})();
 </script>
 </body>
 </html>
