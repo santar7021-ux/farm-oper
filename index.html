@@ -9,6 +9,16 @@
 :root{--bg:#f6f5f1;--sf:#fff;--sf2:#faf9f6;--pr:#33582a;--pd:#24421d;--pl:#edf2e8;--ac:#b08a33;--at:#7a5f1f;--al:#f6efdd;--tx:#1c1d1a;--tl:#686a64;--tm:#9b9d96;--bd:#e4e2dc;--bd2:#eeece7;--dg:#b23a2f;--dl:#fbedeb;--rd:14px;--ring:0 0 0 3px rgba(51,88,42,.14);color-scheme:light}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;--ring:0 0 0 3px rgba(95,143,76,.25);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;color-scheme:dark}
+/* 자동완성 */
+.ac-wrap{position:relative}
+.ac-list{position:absolute;top:100%;left:0;right:0;background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:200;max-height:220px;overflow-y:auto;display:none;margin-top:4px}
+.ac-list.show{display:block}
+.ac-item{padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--bd2);display:flex;flex-direction:column;gap:2px;transition:background .15s}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover,.ac-item.sel{background:var(--pl)}
+.ac-item .ac-nm{font-weight:600;font-size:15px;color:var(--tx)}
+.ac-item .ac-info{font-size:13px;color:var(--tl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-empty{padding:12px 14px;color:var(--tm);font-size:13px;text-align:center}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
@@ -197,7 +207,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>보내는 사람</h3>
-      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름" autocomplete="off" oninput="acInput('s')" onfocus="acInput('s')"><div class="ac-list" id="sAC"></div></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
       <div class="fr"><label>주소</label>
         <div class="ag3"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="sHint"></div>
@@ -205,7 +215,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>받는 사람</h3>
-      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름"></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름" autocomplete="off" oninput="acInput('r')" onfocus="acInput('r')"><div class="ac-list" id="rAC"></div></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
       <div class="fr"><label>주소 <span class="rq">*</span></label>
         <div class="ag3"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="rHint"></div>
@@ -457,10 +467,83 @@ function saveO(){
     r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
   if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1){Object.assign(O[i],dt);sheetUpdate(O[i])}toast('수정 완료')}
   else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
+  // 연락처 저장 (자동완성용)
+  saveContact('s',dt.s);saveContact('r',dt.r);
   sv();render();cm('mForm');EI=null;
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
 function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
+
+// ===== 연락처 자동완성 =====
+function getContacts(){try{return JSON.parse(localStorage.getItem('pearCtc')||'[]')}catch{return[]}}
+function setContacts(c){localStorage.setItem('pearCtc',JSON.stringify(c))}
+function saveContact(type,info){
+  if(!info.nm)return;
+  const contacts=getContacts();
+  // 기존 동일인 찾기 (이름+연락처 끝4자리)
+  const key=info.nm+'|'+last4(info.ph);
+  const idx=contacts.findIndex(c=>c.nm+'|'+last4(c.ph)===key);
+  const entry={nm:info.nm,ph:info.ph,pv:info.pv||'',ci:info.ci||'',su:info.su||'',dt:info.dt||'',type,ts:Date.now()};
+  if(idx>-1)contacts[idx]=entry;else contacts.push(entry);
+  // 최근 100명까지만 유지
+  contacts.sort((a,b)=>b.ts-a.ts);
+  setContacts(contacts.slice(0,100));
+}
+function acInput(prefix){
+  const input=document.getElementById(prefix==='s'?'sN':'rN');
+  const list=document.getElementById(prefix==='s'?'sAC':'rAC');
+  const q=input.value.trim();
+  const contacts=getContacts();
+  // 기존 주문 데이터에서도 연락처 수집
+  const allC=new Map();
+  contacts.forEach(c=>allC.set(c.nm+'|'+last4(c.ph),c));
+  O.forEach(o=>{
+    if(o.s.nm){const k=o.s.nm+'|'+last4(o.s.ph);if(!allC.has(k))allC.set(k,{nm:o.s.nm,ph:o.s.ph,pv:o.s.pv,ci:o.s.ci,su:o.s.su,dt:o.s.dt,type:'s',ts:0})}
+    if(o.r.nm){const k=o.r.nm+'|'+last4(o.r.ph);if(!allC.has(k))allC.set(k,{nm:o.r.nm,ph:o.r.ph,pv:o.r.pv,ci:o.r.ci,su:o.r.su,dt:o.r.dt,type:'r',ts:0})}
+  });
+  let matches=[...allC.values()];
+  if(q)matches=matches.filter(c=>c.nm.includes(q));
+  matches.sort((a,b)=>b.ts-a.ts);
+  matches=matches.slice(0,8);
+  if(!matches.length){
+    if(q)list.innerHTML='<div class="ac-empty">새로운 이름으로 직접 입력</div>';
+    else list.innerHTML='<div class="ac-empty">저장된 연락처가 없습니다</div>';
+    list.classList.toggle('show',!!q||contacts.length>0);
+    return;
+  }
+  list.innerHTML=matches.map((c,i)=>{
+    const addr=[c.pv,c.ci,c.su].filter(Boolean).join(' ');
+    return `<div class="ac-item" onclick="acSelect('${prefix}',${i})" data-idx="${i}"><span class="ac-nm">${c.nm} <span style="font-weight:400;color:var(--tl)">${c.ph||''}</span></span>${addr?`<span class="ac-info">${addr} ${c.dt||''}</span>`:''}</div>`;
+  }).join('');
+  list.classList.add('show');
+  list._data=matches;
+}
+function acSelect(prefix,idx){
+  const list=document.getElementById(prefix==='s'?'sAC':'rAC');
+  const c=list._data[idx];if(!c)return;
+  const nId=prefix==='s'?'sN':'rN',pId=prefix==='s'?'sP':'rP';
+  const dId=prefix==='s'?'sD':'rD',cId=prefix==='s'?'sC':'rC',gId=prefix==='s'?'sG':'rG',aId=prefix==='s'?'sA':'rA';
+  document.getElementById(nId).value=c.nm;
+  document.getElementById(pId).value=c.ph||'';
+  // 주소 채우기
+  if(c.pv){
+    const dSel=document.getElementById(dId);
+    dSel.value=c.pv;
+    onDo(prefix);
+    setTimeout(()=>{
+      if(c.ci){document.getElementById(cId).value=c.ci;onCi(prefix);
+        setTimeout(()=>{if(c.su)document.getElementById(gId).value=c.su},100);
+      }
+    },100);
+  }
+  if(c.dt)setTimeout(()=>{document.getElementById(aId).value=c.dt},250);
+  list.classList.remove('show');
+  toast(c.nm+'님 정보 자동 입력');
+}
+// 자동완성 외부 클릭 시 닫기
+document.addEventListener('click',function(e){
+  document.querySelectorAll('.ac-list.show').forEach(l=>{if(!l.parentElement.contains(e.target))l.classList.remove('show')});
+});
 
 function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
