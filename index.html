@@ -215,6 +215,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
           <div class="fr"><label>성명 <span class="rq">*</span></label><input id="csN" placeholder="이름"></div>
           <div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="csP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('csP')" readonly><div class="numpad" id="np_csP"></div></div>
         </div>
+        <div class="fr np-wrap"><label>주문 수량</label><input id="csQt" type="tel" placeholder="숫자 입력" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onfocus="npOpen('csQt')" readonly><div class="numpad" id="np_csQt"></div></div>
         <div class="fr"><label>비고 (내용)</label><textarea id="csNo" placeholder="주문 내용, 메모 등을 입력하세요" rows="3"></textarea></div>
       </div>
       <div class="btns" style="margin-top:16px">
@@ -369,31 +370,30 @@ function npBuild(id){
 <button type="button" class="np-btn np-done" onclick="npClose('${id}')">완료</button>
 </div>`;
 }
+const npIsQty=id=>id==='csQt'; // 수량 필드 여부
 function npOpen(id){
-  // 다른 패드 닫기
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
   npBuild(id);
   const el=document.getElementById(id);
   const pad=document.getElementById('np_'+id);
-  // 비어있으면 010- 기본값
   let raw=el.value.replace(/[^0-9]/g,'');
-  if(!raw){raw='010';el.value='010-';fmtP(el)}
-  document.getElementById('npPv_'+id).textContent=el.value||'010-';
+  if(!npIsQty(id)&&!raw){raw='010';el.value='010-';fmtP(el)}
+  document.getElementById('npPv_'+id).textContent=el.value||(npIsQty(id)?'0':'010-');
   pad.classList.add('show');
   npTarget=id;
-  // readonly 해제하여 키보드로도 입력 가능하게
   el.removeAttribute('readonly');
 }
 function npKey(id,key){
   const el=document.getElementById(id);
   let raw=el.value.replace(/[^0-9]/g,'');
+  const maxLen=npIsQty(id)?5:11;
   if(key==='del'){
     if(raw.length>0)raw=raw.slice(0,-1);
   }else{
-    if(raw.length>=11)return; // 최대 11자리
+    if(raw.length>=maxLen)return;
     raw+=key;
   }
-  el.value=raw;fmtP(el);
+  if(npIsQty(id)){el.value=raw}else{el.value=raw;fmtP(el)}
   document.getElementById('npPv_'+id).textContent=el.value||'_';
 }
 function npClose(id){
@@ -446,7 +446,7 @@ function rList(){
       return`<div class="sub-order ${ck?'on':''}">
         <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
         <div class="sub-info">
-          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b>${!isPhoto?`<span class="qt">${o.qt}${unit}</span>`:''}${photoTag}</div><span class="badge b${o.st}">${o.st}</span></div>
+          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b>${!isPhoto?`<span class="qt">${o.qt}${unit}</span>`:''}${isPhoto&&o.qt&&o.qt!=='-'?`<span class="qt">수량 ${o.qt}</span>`:''}${photoTag}</div><span class="badge b${o.st}">${o.st}</span></div>
           ${isPhoto?'':`<div class="sub-recv"><span class="k">받는 분</span><strong>${o.r.nm}</strong><span class="ph">${last4(o.r.ph)}</span></div>`}
           ${!isPhoto&&ra?`<div class="sub-addr">${ra}</div>`:''}
           ${photoThumb}
@@ -564,12 +564,12 @@ function showEm(){
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
 // ===== 엑셀 생성 =====
 function buildExcelData(orders){
-  const rows=[['No','상품구분','품종','수량','단위','보내는분_성명','보내는분_연락처','보내는분_주소','받는분_성명','받는분_연락처','받는분_주소','배송메모','접수일시','상태']];
+  const rows=[['No','상품구분','품종','과수','단위','보내는분_성명','보내는분_연락처','보내는분_주소','받는분_성명','받는분_연락처','받는분_주소','주문수량','배송메모']];
   orders.forEach((o,i)=>{
     const sA=[o.s.pv,o.s.ci,o.s.su,o.s.dt].filter(Boolean).join(' ');
     const rA=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
     const unit=o.cat==='배즙'?'박스':'kg';
-    rows.push([i+1,o.cat||'배',o.va,o.qt,unit,o.s.nm,o.s.ph,sA,o.r.nm,o.r.ph,rA,o.r.no||'',o.ca?new Date(o.ca).toLocaleString('ko-KR'):'',o.st]);
+    rows.push([i+1,o.cat||'배',o.va,o.qt,unit,o.s.nm,o.s.ph,sA,o.r.nm,o.r.ph,rA,o.qt||'',o.r.no||'']);
   });
   return rows;
 }
@@ -577,7 +577,7 @@ function makeExcelBlob(orders){
   const data=buildExcelData(orders);
   const ws=XLSX.utils.aoa_to_sheet(data);
   // 열 너비 설정
-  ws['!cols']=[{wch:4},{wch:8},{wch:8},{wch:6},{wch:5},{wch:10},{wch:15},{wch:30},{wch:10},{wch:15},{wch:30},{wch:20},{wch:18},{wch:8}];
+  ws['!cols']=[{wch:4},{wch:8},{wch:8},{wch:6},{wch:5},{wch:10},{wch:15},{wch:30},{wch:10},{wch:15},{wch:30},{wch:10},{wch:20}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'주문내역');
   const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
@@ -625,7 +625,9 @@ async function doEmAll(){
     if(photoOrders.length){
       let photoBody='안녕하세요, 광진농원입니다.\n\n사진 접수 주문 '+photoOrders.length+'건을 전달합니다.\n\n';
       photoOrders.forEach((o,i)=>{
-        photoBody+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')\n';
+        photoBody+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')';
+        if(o.qt&&o.qt!=='-')photoBody+=' / 주문 수량: '+o.qt;
+        photoBody+='\n';
         if(o.r.no)photoBody+='    내용: '+o.r.no+'\n';
         photoBody+='\n';
       });
@@ -694,6 +696,7 @@ function camSelected(e){
     // 입력 필드 초기화
     document.getElementById('csN').value='';
     document.getElementById('csP').value='010-';
+    document.getElementById('csQt').value='';
     document.getElementById('csNo').value='';
   };reader.readAsDataURL(f);
 }
@@ -702,10 +705,11 @@ function camSave(){
   const ph=document.getElementById('csP').value.trim();
   if(!nm)return toast('보내는 분 성명을 입력해주세요');
   if(!ph||ph==='010-')return toast('보내는 분 연락처를 입력해주세요');
+  const qty=document.getElementById('csQt').value.trim()||'-';
   const memo=document.getElementById('csNo').value.trim();
   // 사진 주문 데이터 생성
   const dt={
-    cat:'사진',va:'사진접수',qt:'-',
+    cat:'사진',va:'사진접수',qt:qty,
     s:{nm,ph,pv:'',ci:'',su:'',dt:''},
     r:{nm:'-',ph:'-',pv:'',ci:'',su:'',dt:'',no:memo},
     img:camB64,
