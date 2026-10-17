@@ -66,8 +66,12 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .grp-l{min-width:0}
 .grp-name{display:flex;align-items:baseline;gap:8px;min-width:0}
 .grp-sender{font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.grp-phone{font-size:13px;color:var(--tm);font-variant-numeric:tabular-nums}
-.grp-meta{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tl);margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grp-phone{font-size:12px;color:var(--tl);font-weight:500;font-variant-numeric:tabular-nums;background:var(--sf2);border:1px solid var(--bd);padding:2px 7px;border-radius:5px;white-space:nowrap;letter-spacing:.3px}
+.grp-meta{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tl);margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grp-method{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;letter-spacing:-.01em}
+.grp-method.m-direct{background:var(--sf2);color:var(--tx);border:1px solid var(--bd)}
+.grp-method.m-photo{background:var(--sf2);color:var(--at);border:1px solid color-mix(in srgb,var(--ac) 30%,var(--bd))}
+.grp-method.m-mix{background:var(--sf2);color:var(--tx);border:1px solid var(--bd)}
 .sep{width:3px;height:3px;border-radius:50%;background:var(--tm)}
 .grp-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
@@ -258,13 +262,13 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 </div></div>
 
 <div class="mo" id="mEm"><div class="ml sm"><div class="mh"><h2>택배 전달</h2><button class="bc" onclick="cm('mEm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb">
-  <p class="lead">선택한 주문 <strong id="eCnt">0</strong>건을 엑셀 파일과 함께 메일로 전달합니다.</p>
+  <div id="emSummary" style="margin-bottom:16px"></div>
   <label class="eo" onclick="sEmS(0,this)"><input type="radio" name="eto"><div><b>광진</b><span>gwang-jin@naver.com</span></div></label>
   <label class="eo" onclick="sEmS(1,this)"><input type="radio" name="eto"><div><b>명진</b><span>santar7021@gmail.com</span></div></label>
 </div><div class="mf">
   <div class="btns" style="flex-direction:column;gap:10px">
-    <button class="bp" id="btnEmSend" onclick="doEmAuto()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>엑셀 첨부 메일 발송</button>
-    <button class="bp sec" onclick="doEmManual()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>엑셀 다운로드 후 직접 발송</button>
+    <button class="bp" id="btnEmSend" onclick="doEmAll()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>메일 발송</button>
+    <button class="bp sec" id="btnEmDown" onclick="doEmManual()"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>엑셀 다운로드 후 직접 발송</button>
   </div>
 </div></div></div>
 
@@ -457,12 +461,21 @@ function rList(){
         </div>
       </div>`;
     }).join('');
+    const photoCnt=items.filter(o=>o.cat==='사진').length;
+    const directCnt=items.length-photoCnt;
+    let methodHtml='';
+    if(directCnt&&photoCnt)methodHtml=`<span class="grp-method m-mix">📋 직접 ${directCnt} · 📷 사진 ${photoCnt}</span>`;
+    else if(photoCnt)methodHtml='<span class="grp-method m-photo">📷 사진 접수</span>';
+    else methodHtml='<span class="grp-method m-direct">📋 직접 접수</span>';
     return`<div class="grp ${allChecked?'ck':''}">
       <div class="grp-hd" onclick="togGrp('${k}')">
         <input type="checkbox" ${allChecked?'checked':''} onclick="event.stopPropagation()" onchange="togGrpCk('${k}',this.checked)">
         <div class="grp-info">
-          <div class="grp-l"><div class="grp-name"><span class="grp-sender">${nm}</span><span class="grp-phone">${ph4}</span></div>
-            <div class="grp-meta"><span>${items.length}건</span><span class="sep"></span><span class="grp-date">${dstr}</span></div></div>
+          <div class="grp-l">
+            <div style="margin-bottom:5px">${methodHtml}</div>
+            <div class="grp-name"><span class="grp-sender">${nm}</span><span class="grp-phone">연락처 끝 네자리 ${ph4}</span></div>
+            <div class="grp-meta"><span>${items.length}건</span><span class="sep"></span><span class="grp-date">${dstr}</span></div>
+          </div>
           <div class="grp-badges">${badges}</div>
         </div>
         <span class="grp-arrow ${isOpen?'open':''}">${IC.chev}</span>
@@ -535,7 +548,19 @@ function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o
 
 
 
-function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
+function showEm(){
+  if(!CK.size)return;
+  const ck=O.filter(o=>CK.has(o.id));
+  const directOrders=ck.filter(o=>o.cat!=='사진');
+  const photoOrders=ck.filter(o=>o.cat==='사진');
+  let summary=`<p class="lead">선택한 주문 <strong>${ck.length}</strong>건을 메일로 전달합니다.</p>`;
+  if(directOrders.length)summary+=`<p style="font-size:14px;color:var(--tl);margin-top:4px">📋 직접 접수 ${directOrders.length}건 → 엑셀 첨부</p>`;
+  if(photoOrders.length)summary+=`<p style="font-size:14px;color:var(--tl);margin-top:2px">📷 사진 접수 ${photoOrders.length}건 → 이미지 첨부</p>`;
+  document.getElementById('emSummary').innerHTML=summary;
+  // 직접 접수 건이 있을 때만 엑셀 다운로드 버튼 표시
+  document.getElementById('btnEmDown').style.display=directOrders.length?'':'none';
+  SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm');
+}
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
 // ===== 엑셀 생성 =====
 function buildExcelData(orders){
@@ -570,32 +595,69 @@ function downloadExcel(orders){
   URL.revokeObjectURL(url);
 }
 
-// 엑셀 첨부 자동 메일 발송 (Apps Script 경유)
-async function doEmAuto(){
+// 통합 메일 발송 (직접접수: 엑셀 / 사진접수: 이미지+비고)
+async function doEmAll(){
   if(SE===null)return toast('받는 분을 선택해주세요');
   const ck=O.filter(o=>CK.has(o.id));if(!ck.length)return;
+  const directOrders=ck.filter(o=>o.cat!=='사진');
+  const photoOrders=ck.filter(o=>o.cat==='사진');
   const u=getSheetUrl();
-  if(!u){toast('설정에서 스프레드시트 URL을 먼저 등록해주세요');return}
   const btn=document.getElementById('btnEmSend');
   btn.disabled=true;btn.textContent='발송 중...';
+  let sentCount=0;
   try{
-    const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({action:'sendEmail',orders:ck,toEmail:EM[SE],toName:EN[SE]})});
-    const data=await r.json();
-    if(data.ok){
-      toast(`${EN[SE]}님에게 엑셀 첨부 메일 발송 완료 (${ck.length}건)`);
-      // 발송 후 상태를 접수완료로 변경
+    // 1) 직접 접수 → 엑셀 첨부 메일 (Apps Script 경유)
+    if(directOrders.length&&u){
+      const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'sendEmail',orders:directOrders,toEmail:EM[SE],toName:EN[SE]})});
+      const data=await r.json();
+      if(data.ok)sentCount+=directOrders.length;
+      else toast('직접 접수 발송 실패: '+(data.error||''));
+    }else if(directOrders.length&&!u){
+      // Apps Script 미설정 시 엑셀 다운로드 + Gmail
+      downloadExcel(directOrders);
+      const su=encodeURIComponent(`[광진농원] 택배 전달 - 직접 접수 (${directOrders.length}건)`);
+      const body=encodeURIComponent(`안녕하세요, 광진농원입니다.\n\n직접 접수 주문 ${directOrders.length}건을 첨부합니다.\n다운로드된 엑셀 파일을 첨부해주세요.\n\n감사합니다.`);
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su}&body=${body}`,'_blank');
+      sentCount+=directOrders.length;
+    }
+    // 2) 사진 접수 → 이미지+비고 메일 (Gmail compose)
+    if(photoOrders.length){
+      let photoBody='안녕하세요, 광진농원입니다.\n\n사진 접수 주문 '+photoOrders.length+'건을 전달합니다.\n\n';
+      photoOrders.forEach((o,i)=>{
+        photoBody+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')\n';
+        if(o.r.no)photoBody+='    내용: '+o.r.no+'\n';
+        photoBody+='\n';
+      });
+      photoBody+='※ 사진 이미지는 별도 다운로드 후 첨부해주세요.\n감사합니다.';
+      // 사진 파일 다운로드
+      photoOrders.forEach((o,i)=>{
+        if(o.img){
+          const a=document.createElement('a');a.href=o.img;
+          a.download=`사진주문_${o.s.nm}_${(i+1)}.jpg`;
+          document.body.appendChild(a);a.click();document.body.removeChild(a);
+        }
+      });
+      const su2=encodeURIComponent(`[광진농원] 택배 전달 - 사진 접수 (${photoOrders.length}건)`);
+      setTimeout(()=>{
+        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su2}&body=${encodeURIComponent(photoBody)}`,'_blank');
+      },500);
+      sentCount+=photoOrders.length;
+    }
+    if(sentCount){
       ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
       sv();render();cm('mEm');
-    }else{toast('발송 실패: '+(data.error||'알 수 없음'))}
-  }catch(err){console.error(err);toast('메일 발송 실패 — 엑셀 다운로드를 이용해주세요')}
-  btn.disabled=false;btn.innerHTML='<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>엑셀 첨부 메일 발송';
+      toast(`${EN[SE]}님에게 ${sentCount}건 전달 완료`);
+    }
+  }catch(err){console.error(err);toast('발송 중 오류 발생')}
+  btn.disabled=false;btn.innerHTML='<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>메일 발송';
 }
 
-// 엑셀 다운로드 + Gmail 열기 (수동 첨부)
+// 엑셀 다운로드 + Gmail 열기 (직접접수 건만)
 function doEmManual(){
   if(SE===null)return toast('받는 분을 선택해주세요');
-  const ck=O.filter(o=>CK.has(o.id));if(!ck.length)return;
+  const ck=O.filter(o=>CK.has(o.id)&&o.cat!=='사진');
+  if(!ck.length)return toast('직접 접수 건이 없습니다');
   downloadExcel(ck);
   const su=encodeURIComponent(`[광진농원] 택배 전달 (${ck.length}건)`);
   const body=encodeURIComponent(`안녕하세요, 광진농원입니다.\n\n택배 전달 주문 ${ck.length}건을 첨부합니다.\n다운로드된 엑셀 파일을 첨부해주세요.\n\n감사합니다.`);
