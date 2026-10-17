@@ -151,6 +151,9 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .cat-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cat-tab{height:52px;border-radius:12px;border:1px solid var(--bd);background:var(--sf);font-size:16px;font-weight:600;color:var(--tl);transition:all .15s}
 .cat-tab.on{border-color:var(--pr);background:var(--pl);color:var(--pd);box-shadow:0 0 0 1px var(--pr)}
+/* 사진 접수 */
+.cam-img{border-radius:12px;overflow:hidden;border:1px solid var(--bd);margin-bottom:16px;background:var(--sf2)}.cam-img img{width:100%;display:block;max-height:320px;object-fit:contain}
+.photo-tag{display:inline-flex;align-items:center;gap:4px;background:var(--al);color:var(--at);font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;margin-left:6px}
 .toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 8px 24px -6px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -169,7 +172,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   <div class="hd-act">
     <button class="ib btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button>
     <button class="ib btn-set" onclick="sm('mSet')" title="설정"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
-    <button class="bn" onclick="openForm()"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>접수</button>
+    <button class="bn" onclick="showCh()"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>접수</button>
   </div>
 </div></header>
 <main class="wrap">
@@ -182,6 +185,41 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 <div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>
 
 
+
+<div class="mo" id="mCh"><div class="ml sm"><div class="mh"><h2>접수 방식 선택</h2><button class="bc" onclick="cm('mCh')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb"><div class="cl">
+  <button class="ci" onclick="cm('mCh');openForm()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="ci-tx"><b>직접 접수</b><span class="ds">주문 정보를 직접 입력합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+  <button class="ci" onclick="cm('mCh');openCam()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진 접수</b><span class="ds">사진을 촬영하거나 선택해서 접수합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+</div></div></div></div>
+
+<div class="mo" id="mCam"><div class="ml sm">
+  <div class="mh"><h2>사진 접수</h2><button class="bc" onclick="cm('mCam')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="mb">
+    <div id="camStep1">
+      <p class="lead">주문서 사진을 촬영하거나 갤러리에서 선택하세요.</p>
+      <input type="file" accept="image/*" capture="environment" id="camInPhoto" style="display:none" onchange="camSelected(event)">
+      <input type="file" accept="image/*" id="camInGallery" style="display:none" onchange="camSelected(event)">
+      <div class="cl">
+        <button class="ci" onclick="document.getElementById('camInPhoto').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진 촬영</b><span class="ds">카메라로 주문서를 촬영합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        <button class="ci" onclick="document.getElementById('camInGallery').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.75"/><path d="m20.5 15.5-4.5-4.5-9 8.5"/></svg></span><span class="ci-tx"><b>갤러리에서 선택</b><span class="ds">저장된 사진을 불러옵니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <div id="camStep2" style="display:none">
+      <div class="cam-img"><img id="camImg" alt="촬영된 사진"></div>
+      <div class="fc">
+        <h3>보내는 사람</h3>
+        <div class="ag">
+          <div class="fr"><label>성명 <span class="rq">*</span></label><input id="csN" placeholder="이름"></div>
+          <div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="csP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('csP')" readonly><div class="numpad" id="np_csP"></div></div>
+        </div>
+        <div class="fr"><label>비고 (내용)</label><textarea id="csNo" placeholder="주문 내용, 메모 등을 입력하세요" rows="3"></textarea></div>
+      </div>
+      <div class="btns" style="margin-top:16px">
+        <button class="bp sec" onclick="camReset()">다시 선택</button>
+        <button class="bp" onclick="camSave()">임시 저장</button>
+      </div>
+    </div>
+  </div>
+</div></div>
 
 <div class="mo" id="mForm"><div class="ml">
   <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -398,17 +436,21 @@ function rList(){
       const ds=`${d.getMonth()+1}/${d.getDate()} ${Z(d.getHours())}:${Z(d.getMinutes())}`;
       const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
       const ck=CK.has(o.id),unit=o.cat==='배즙'?'박스':'kg',pend=o.st==='접수';
+      const isPhoto=o.cat==='사진';
+      const photoTag=isPhoto?'<span class="photo-tag">📷 사진</span>':'';
+      const photoThumb=isPhoto&&o.img?`<div class="cam-img" style="margin:8px 0;cursor:pointer" onclick="event.stopPropagation();window.open('${o.img}','_blank')"><img src="${o.img}" alt="주문서 사진" style="max-height:160px"></div>`:'';
       return`<div class="sub-order ${ck?'on':''}">
         <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
         <div class="sub-info">
-          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b><span class="qt">${o.qt}${unit}</span></div><span class="badge b${o.st}">${o.st}</span></div>
-          <div class="sub-recv"><span class="k">받는 분</span><strong>${o.r.nm}</strong><span class="ph">${last4(o.r.ph)}</span></div>
-          ${ra?`<div class="sub-addr">${ra}</div>`:''}
+          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b>${!isPhoto?`<span class="qt">${o.qt}${unit}</span>`:''}${photoTag}</div><span class="badge b${o.st}">${o.st}</span></div>
+          ${isPhoto?'':`<div class="sub-recv"><span class="k">받는 분</span><strong>${o.r.nm}</strong><span class="ph">${last4(o.r.ph)}</span></div>`}
+          ${!isPhoto&&ra?`<div class="sub-addr">${ra}</div>`:''}
+          ${photoThumb}
           ${o.r.no?`<div class="sub-note">${o.r.no}</div>`:''}
           <div class="sub-ft"><span class="sub-id">#${o.id.slice(-4).toUpperCase()} · ${ds}</span>
             <div class="sub-acts">
               <button class="bs ${pend?'bst':''}" onclick="event.stopPropagation();cyc('${o.id}')">${pend?'완료 처리':'접수로 되돌리기'}</button>
-              <button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>
+              ${!isPhoto?`<button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>`:''}
               <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
             </div>
           </div>
@@ -561,6 +603,58 @@ function doEmManual(){
   cm('mEm');toast('엑셀 다운로드 완료 — Gmail에서 파일을 첨부해주세요');
 }
 
+function showCh(){sm('mCh')}
+
+// ===== 사진 접수 =====
+let camB64='';
+function openCam(){
+  document.getElementById('camStep1').style.display='';
+  document.getElementById('camStep2').style.display='none';
+  document.getElementById('camInPhoto').value='';
+  document.getElementById('camInGallery').value='';
+  camB64='';sm('mCam');
+}
+function camReset(){
+  document.getElementById('camStep1').style.display='';
+  document.getElementById('camStep2').style.display='none';
+  document.getElementById('camInPhoto').value='';
+  document.getElementById('camInGallery').value='';
+  camB64='';
+}
+function camSelected(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    camB64=ev.target.result;
+    document.getElementById('camImg').src=camB64;
+    document.getElementById('camStep1').style.display='none';
+    document.getElementById('camStep2').style.display='';
+    // 입력 필드 초기화
+    document.getElementById('csN').value='';
+    document.getElementById('csP').value='010-';
+    document.getElementById('csNo').value='';
+  };reader.readAsDataURL(f);
+}
+function camSave(){
+  const nm=document.getElementById('csN').value.trim();
+  const ph=document.getElementById('csP').value.trim();
+  if(!nm)return toast('보내는 분 성명을 입력해주세요');
+  if(!ph||ph==='010-')return toast('보내는 분 연락처를 입력해주세요');
+  const memo=document.getElementById('csNo').value.trim();
+  // 사진 주문 데이터 생성
+  const dt={
+    cat:'사진',va:'사진접수',qt:'-',
+    s:{nm,ph,pv:'',ci:'',su:'',dt:''},
+    r:{nm:'-',ph:'-',pv:'',ci:'',su:'',dt:'',no:memo},
+    img:camB64,
+    id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2),
+    ca:new Date().toISOString(),
+    st:'접수'
+  };
+  O.push(dt);sv();render();
+  sheetAdd(dt);
+  cm('mCam');toast('사진 주문이 임시 저장되었습니다');
+}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
 // ===== 구글 스프레드시트 연동 =====
