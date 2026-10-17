@@ -19,6 +19,16 @@
 .ac-item .ac-nm{font-weight:600;font-size:15px;color:var(--tx)}
 .ac-item .ac-info{font-size:13px;color:var(--tl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ac-empty{padding:12px 14px;color:var(--tm);font-size:13px;text-align:center}
+/* 숫자 터치패드 */
+.np-wrap{position:relative}
+.numpad{display:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:8px;margin-top:6px;user-select:none;-webkit-user-select:none}
+.numpad.show{display:block}
+.np-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.np-btn{height:48px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd2);font-size:20px;font-weight:600;color:var(--tx);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s,transform .1s;-webkit-tap-highlight-color:transparent}
+.np-btn:active{background:var(--pl);transform:scale(.94)}
+.np-btn.np-done{background:var(--pr);color:#fff;border-color:var(--pr);font-size:15px;font-weight:600}
+.np-btn.np-del svg{width:22px;height:22px;stroke:var(--tx);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.np-preview{text-align:center;font-size:22px;font-weight:600;letter-spacing:2px;padding:8px 0 4px;color:var(--tx);font-family:'Pretendard Variable',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--tx);font-size:16px;line-height:1.5;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
@@ -207,7 +217,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>보내는 사람</h3>
-      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름" autocomplete="off" oninput="acInput('s')" onfocus="acInput('s')"><div class="ac-list" id="sAC"></div></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름" autocomplete="off" oninput="acInput('s')" onfocus="acInput('s')"><div class="ac-list" id="sAC"></div></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('sP')" readonly><div class="numpad" id="np_sP"></div></div></div>
       <div class="fr"><label>주소</label>
         <div class="ag3"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="sHint"></div>
@@ -215,7 +225,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>받는 사람</h3>
-      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름" autocomplete="off" oninput="acInput('r')" onfocus="acInput('r')"><div class="ac-list" id="rAC"></div></div><div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)"></div></div>
+      <div class="ag"><div class="fr ac-wrap"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름" autocomplete="off" oninput="acInput('r')" onfocus="acInput('r')"><div class="ac-list" id="rAC"></div></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('rP')" readonly><div class="numpad" id="np_rP"></div></div></div>
       <div class="fr"><label>주소 <span class="rq">*</span></label>
         <div class="ag3"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="rHint"></div>
@@ -347,6 +357,64 @@ function customSel(el,msg){if(el.value!=='__i__')return;const v=prompt(msg);if(v
 function ensureOpt(sel,val){if(!val)return;for(let i=0;i<sel.options.length;i++)if(sel.options[i].value===val)return;const o=document.createElement('option');o.value=val;o.textContent=val;sel.insertBefore(o,sel.querySelector('[value="__i__"]'));} 
 function fmtP(el){let v=el.value.replace(/[^0-9]/g,'');if(v.length>3&&v.length<=7)v=v.slice(0,3)+'-'+v.slice(3);else if(v.length>7)v=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11);el.value=v}
 
+// ===== 숫자 터치패드 =====
+let npTarget=null;
+function npBuild(id){
+  const pad=document.getElementById('np_'+id);
+  if(pad.children.length)return; // 이미 생성됨
+  pad.innerHTML=`<div class="np-preview" id="npPv_${id}">010-</div>
+<div class="np-grid">
+<button type="button" class="np-btn" onclick="npKey('${id}','1')">1</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','2')">2</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','3')">3</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','4')">4</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','5')">5</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','6')">6</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','7')">7</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','8')">8</button>
+<button type="button" class="np-btn" onclick="npKey('${id}','9')">9</button>
+<button type="button" class="np-btn np-del" onclick="npKey('${id}','del')"><svg viewBox="0 0 24 24"><path d="M9 18l-6-6 6-6"/><path d="M21 6H9l-6 6 6 6h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z"/><path d="m14 10 4 4M18 10l-4 4"/></svg></button>
+<button type="button" class="np-btn" onclick="npKey('${id}','0')">0</button>
+<button type="button" class="np-btn np-done" onclick="npClose('${id}')">완료</button>
+</div>`;
+}
+function npOpen(id){
+  // 다른 패드 닫기
+  document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
+  npBuild(id);
+  const el=document.getElementById(id);
+  const pad=document.getElementById('np_'+id);
+  // 비어있으면 010- 기본값
+  let raw=el.value.replace(/[^0-9]/g,'');
+  if(!raw){raw='010';el.value='010-';fmtP(el)}
+  document.getElementById('npPv_'+id).textContent=el.value||'010-';
+  pad.classList.add('show');
+  npTarget=id;
+  // readonly 해제하여 키보드로도 입력 가능하게
+  el.removeAttribute('readonly');
+}
+function npKey(id,key){
+  const el=document.getElementById(id);
+  let raw=el.value.replace(/[^0-9]/g,'');
+  if(key==='del'){
+    if(raw.length>0)raw=raw.slice(0,-1);
+  }else{
+    if(raw.length>=11)return; // 최대 11자리
+    raw+=key;
+  }
+  el.value=raw;fmtP(el);
+  document.getElementById('npPv_'+id).textContent=el.value||'_';
+}
+function npClose(id){
+  document.getElementById('np_'+id).classList.remove('show');
+  document.getElementById(id).setAttribute('readonly','');
+  npTarget=null;
+}
+// 외부 클릭 시 패드 닫기
+document.addEventListener('click',function(e){
+  if(npTarget&&!e.target.closest('.np-wrap')){npClose(npTarget)}
+});
+
 // ===== 렌더링 =====
 function render(){rStats();rList();uBB()}
 const IC={chev:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',box:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>'};
@@ -441,11 +509,15 @@ function openForm(d){
   const fvEl=document.getElementById('fV'),fqEl=document.getElementById('fQ');
   if(d?.cat){pickCat(d.cat);if(d.va)ensureOpt(fvEl,d.va);fvEl.value=d?.va||'';if(d.qt)ensureOpt(fqEl,d.qt);fqEl.value=d?.qt||''}
   else{fvEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>';fqEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>'}
-  document.getElementById('sN').value=d?.s?.nm||'';document.getElementById('sP').value=d?.s?.ph||'';
+  document.getElementById('sN').value=d?.s?.nm||'';document.getElementById('sP').value=d?.s?.ph||(d?'':'010-');
   sAddr('s',d?.s);document.getElementById('sA').value=d?.s?.dt||'';
-  document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||'';
+  document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||(d?'':'010-');
   sAddr('r',d?.r);document.getElementById('rA').value=d?.r?.dt||'';
-  document.getElementById('rNo').value=d?.r?.no||'';sm('mForm');
+  document.getElementById('rNo').value=d?.r?.no||'';
+  // 터치패드 닫기 & readonly 복원
+  document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
+  ['sP','rP'].forEach(id=>document.getElementById(id).setAttribute('readonly',''));
+  sm('mForm');
 }
 function sAddr(p,d){
   const de=document.getElementById(p+'D'),ce=document.getElementById(p+'C'),se=document.getElementById(p+'G');
