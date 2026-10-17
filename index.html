@@ -818,15 +818,19 @@ function applyBuiltin(){
     toast('기본 URL이 입력란에 적용되었습니다. 저장 및 연결을 눌러주세요.');
   }
 }
-async function syncFromSheet(){
+async function syncFromSheet(silent){
   const u=getSheetUrl();if(!u)return;
   const btn=document.getElementById('btnSync');
   btn.classList.add('spinning');
   try{
     const r=await fetch(u);const data=await r.json();
-    if(Array.isArray(data)){O=data;sv();render();toast(`스프레드시트에서 ${data.length}건 불러옴`)}
-    else if(data.error){toast('오류: '+data.error)}
-  }catch(err){console.error(err);toast('스프레드시트 연결 실패')}
+    if(Array.isArray(data)){
+      const changed=JSON.stringify(data)!==JSON.stringify(O);
+      if(changed){O=data;sv();render();if(!silent)toast(`스프레드시트에서 ${data.length}건 불러옴`)}
+      else if(!silent){toast('이미 최신 상태입니다')}
+    }
+    else if(data.error&&!silent){toast('오류: '+data.error)}
+  }catch(err){console.error(err);if(!silent)toast('스프레드시트 연결 실패')}
   btn.classList.remove('spinning');
 }
 async function syncToSheet(){
@@ -853,6 +857,8 @@ async function sheetDelete(id){
 }
 
 initA();ld();render();updateSheetStatus();
+// 30초마다 자동 동기화
+setInterval(()=>{const u=getSheetUrl();if(u)syncFromSheet(true)},30000);
 // 구글 시트 연결 시 자동 동기화 (시트 데이터 우선)
 (async function(){
   const u=getSheetUrl();
