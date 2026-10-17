@@ -9,23 +9,7 @@
 :root{--bg:#f6f5f1;--sf:#fff;--sf2:#faf9f6;--pr:#33582a;--pd:#24421d;--pl:#edf2e8;--ac:#b08a33;--at:#7a5f1f;--al:#f6efdd;--tx:#1c1d1a;--tl:#686a64;--tm:#9b9d96;--bd:#e4e2dc;--bd2:#eeece7;--dg:#b23a2f;--dl:#fbedeb;--rd:14px;--ring:0 0 0 3px rgba(51,88,42,.14);color-scheme:light}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;--ring:0 0 0 3px rgba(95,143,76,.25);color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#121311;--sf:#1b1c19;--sf2:#20211e;--pr:#5f8f4c;--pd:#bcd7ab;--pl:#223020;--ac:#d2b469;--at:#d8bb72;--al:#2c2717;--tx:#ecebe6;--tl:#a5a79f;--tm:#777972;--bd:#2f302c;--bd2:#262723;--dg:#e2796e;--dl:#33201d;color-scheme:dark}
-/* 손글씨 입력 */
-.nm-row{display:flex;gap:6px;align-items:flex-end}
-.nm-row input{flex:1}
-.hw-toggle{width:42px;height:42px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s}
-.hw-toggle:active,.hw-toggle.on{background:var(--pl);border-color:var(--pr)}
-.hw-toggle svg{width:20px;height:20px;stroke:var(--tx);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hw-pad{display:none;margin-top:8px;border:2px solid var(--bd);border-radius:12px;background:#fff;overflow:hidden;position:relative}
-@media(prefers-color-scheme:dark){.hw-pad{background:#1a1a1a}}
-:root[data-theme="dark"] .hw-pad{background:#1a1a1a}
-.hw-pad.show{display:block}
-.hw-pad canvas{display:block;width:100%;touch-action:none;cursor:crosshair}
-.hw-bar{display:flex;gap:6px;padding:8px;background:var(--sf2);border-top:1px solid var(--bd)}
-.hw-bar button{flex:1;padding:10px 0;border-radius:8px;font-size:14px;font-weight:600;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer}
-.hw-bar .hw-ok{background:var(--pr);color:#fff;border-color:var(--pr)}
-.hw-bar button:active{opacity:.8}
-.hw-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--tm);font-size:15px;pointer-events:none;transition:opacity .2s}
-.hw-hint.hide{opacity:0}
+
 /* 숫자 터치패드 */
 .np-wrap{position:relative}
 .numpad{display:none;background:var(--sf);border:1px solid var(--bd);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:8px;margin-top:6px;user-select:none;-webkit-user-select:none}
@@ -169,13 +153,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .cat-tab.on{border-color:var(--pr);background:var(--pl);color:var(--pd);box-shadow:0 0 0 1px var(--pr)}
 .toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,12px);background:var(--tx);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:500;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 8px 24px -6px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.cam-img{border-radius:12px;overflow:hidden;border:1px solid var(--bd);margin-bottom:16px;background:var(--sf2)}.cam-img img{width:100%;display:block;max-height:320px;object-fit:contain}
-.ocr-spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--pr);border-radius:50%;margin:0 auto;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ocr-box{border:1px solid var(--bd);border-radius:12px;padding:4px 14px 6px;margin-bottom:16px}
-.ocr-box h4{font-size:13px;font-weight:600;color:var(--tl);padding:10px 0 4px}
-.ocr-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;font-size:14px}.ocr-row+.ocr-row{border-top:1px solid var(--bd2)}
-.ocr-label{color:var(--tl);flex-shrink:0}.ocr-val{text-align:right;word-break:break-all;font-weight:500}
+
 .key-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:14px;font-weight:500}
 .key-status .dot{background:currentColor}
 .key-ok,.sheet-ok{background:var(--pl);color:var(--pd)}.key-no{background:var(--dl);color:var(--dg)}.sheet-no{background:var(--al);color:var(--at)}
@@ -191,7 +169,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   <div class="hd-act">
     <button class="ib btn-sync" id="btnSync" onclick="syncFromSheet()" title="동기화" style="display:none"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></button>
     <button class="ib btn-set" onclick="sm('mSet')" title="설정"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
-    <button class="bn" onclick="showCh()"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>접수</button>
+    <button class="bn" onclick="openForm()"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>접수</button>
   </div>
 </div></header>
 <main class="wrap">
@@ -203,10 +181,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 </main>
 <div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>
 
-<div class="mo" id="mCh"><div class="ml sm"><div class="mh"><h2>접수 방식 선택</h2><button class="bc" onclick="cm('mCh')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="mb"><div class="cl">
-  <button class="ci" onclick="cm('mCh');openForm()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span><span class="ci-tx"><b>직접 작성</b><span class="ds">주문 정보를 직접 입력합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-  <button class="ci" onclick="cm('mCh');openCam()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진으로 작성</b><span class="ds">주문서 사진에서 정보를 자동 인식합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-</div></div></div></div>
+
 
 <div class="mo" id="mForm"><div class="ml">
   <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -224,7 +199,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>보내는 사람</h3>
-      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><div class="nm-row"><input id="sN" placeholder="이름"><button type="button" class="hw-toggle" onclick="hwToggle('s')" title="손글씨 입력"><svg viewBox="0 0 24 24"><path d="M17 3l4 4L7 21H3v-4L17 3z"/><path d="M3 21h18"/></svg></button></div><div class="hw-pad" id="hwPad_s"><span class="hw-hint" id="hwHint_s">여기에 이름을 써주세요 ✍️</span><canvas id="hwCvs_s" height="120"></canvas><div class="hw-bar"><button type="button" onclick="hwClear('s')">지우기</button><button type="button" class="hw-ok" onclick="hwRecog('s')">인식</button></div></div></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('sP')" readonly><div class="numpad" id="np_sP"></div></div></div>
+      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('sP')" readonly><div class="numpad" id="np_sP"></div></div></div>
       <div class="fr"><label>주소</label>
         <div class="ag3"><select id="sD" onchange="onDo('s')"><option value="">도 / 시</option></select><select id="sC" disabled onchange="onCi('s')"><option value="">시 / 군 / 구</option></select><select id="sG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="sHint"></div>
@@ -232,7 +207,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
     </div>
     <div class="fc"><h3>받는 사람</h3>
-      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><div class="nm-row"><input id="rN" placeholder="이름"><button type="button" class="hw-toggle" onclick="hwToggle('r')" title="손글씨 입력"><svg viewBox="0 0 24 24"><path d="M17 3l4 4L7 21H3v-4L17 3z"/><path d="M3 21h18"/></svg></button></div><div class="hw-pad" id="hwPad_r"><span class="hw-hint" id="hwHint_r">여기에 이름을 써주세요 ✍️</span><canvas id="hwCvs_r" height="120"></canvas><div class="hw-bar"><button type="button" onclick="hwClear('r')">지우기</button><button type="button" class="hw-ok" onclick="hwRecog('r')">인식</button></div></div></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('rP')" readonly><div class="numpad" id="np_rP"></div></div></div>
+      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름"></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('rP')" readonly><div class="numpad" id="np_rP"></div></div></div>
       <div class="fr"><label>주소 <span class="rq">*</span></label>
         <div class="ag3"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
         <div class="addr-hint" id="rHint"></div>
@@ -255,44 +230,11 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   </div>
 </div></div></div>
 
-<div class="mo" id="mCam"><div class="ml sm">
-  <div class="mh"><h2>사진으로 작성</h2><button class="bc" onclick="cm('mCam')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-  <div class="mb">
-    <div id="camStep1">
-      <p class="lead">주문서 사진을 선택하면 정보를 자동으로 인식합니다.</p>
-      <input type="file" accept="image/*" capture="environment" id="camInPhoto" style="display:none" onchange="camSelected(event)">
-      <input type="file" accept="image/*" id="camInGallery" style="display:none" onchange="camSelected(event)">
-      <div class="cl">
-        <button class="ci" onclick="document.getElementById('camInPhoto').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg></span><span class="ci-tx"><b>사진 촬영</b><span class="ds">카메라로 주문서를 촬영합니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-        <button class="ci" onclick="document.getElementById('camInGallery').click()"><span class="ci-ic"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.75"/><path d="m20.5 15.5-4.5-4.5-9 8.5"/></svg></span><span class="ci-tx"><b>갤러리에서 선택</b><span class="ds">저장된 사진을 불러옵니다</span></span><svg class="i ci-go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-      </div>
-    </div>
-    <div id="camStep2" style="display:none">
-      <div class="cam-img"><img id="camImg" alt=""></div>
-      <div id="ocrStatus" style="display:none;text-align:center;padding:16px 0 24px">
-        <div class="ocr-spinner"></div>
-        <p style="margin-top:14px;font-size:15px;font-weight:600">주문 정보를 인식하고 있습니다</p>
-        <p style="font-size:13px;color:var(--tl);margin-top:2px">잠시만 기다려주세요</p>
-      </div>
-      <div id="ocrResult" style="display:none"><div class="ocr-box"><h4>인식된 정보</h4><div id="ocrPreview"></div></div></div>
-      <div class="btns">
-        <button class="bp sec" onclick="camReset()">다시 선택</button>
-        <button class="bp" id="btnOcrApply" onclick="applyOcr()">주문서에 적용</button>
-      </div>
-    </div>
-  </div>
-</div></div>
+
 
 <div class="mo" id="mSet"><div class="ml sm">
   <div class="mh"><h2>설정</h2><button class="bc" onclick="cm('mSet')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
-    <div class="fc">
-      <h3>API 키</h3>
-      <div id="keyStatus"></div>
-      <p class="help">HTML 파일을 독립 실행할 때 사진 인식(OCR)을 사용하려면 Anthropic API 키가 필요합니다. <a href="https://console.anthropic.com/settings/keys" target="_blank">API 키 발급 →</a></p>
-      <div class="fr"><label>API Key</label><input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." style="letter-spacing:.5px"></div>
-      <div class="btns"><button class="bp s" onclick="saveApiKey()">저장</button><button class="bp s dgr" onclick="clearApiKey()">삭제</button></div>
-    </div>
     <div class="fc">
       <h3>구글 스프레드시트 연동</h3>
       <div id="sheetStatus"></div>
@@ -506,8 +448,6 @@ function filt(f,btn){CF=f;document.querySelectorAll('.ft').forEach(b=>b.classLis
 
 function sm(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden'}
 function cm(id){document.getElementById(id).classList.remove('show');document.body.style.overflow=''}
-function showCh(){sm('mCh')}
-
 function openForm(d){
   EI=d?d.id:null;document.getElementById('fTit').textContent=EI?'주문서 수정':'주문서 작성';
   // 카테고리 복원
@@ -521,10 +461,8 @@ function openForm(d){
   document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||(d?'':'010-');
   sAddr('r',d?.r);document.getElementById('rA').value=d?.r?.dt||'';
   document.getElementById('rNo').value=d?.r?.no||'';
-  // 터치패드 & 손글씨 패드 닫기
+  // 터치패드 닫기
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
-  document.querySelectorAll('.hw-pad.show').forEach(p=>p.classList.remove('show'));
-  document.querySelectorAll('.hw-toggle.on').forEach(b=>b.classList.remove('on'));
   ['sP','rP'].forEach(id=>document.getElementById(id).setAttribute('readonly',''));
   sm('mForm');
 }
@@ -553,96 +491,7 @@ function saveO(){
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
 function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
 
-// ===== 손글씨 입력 (터치펜) =====
-const hwState={s:{drawing:false,hasStroke:false},r:{drawing:false,hasStroke:false}};
 
-function hwToggle(p){
-  const pad=document.getElementById('hwPad_'+p);
-  const btn=pad.previousElementSibling.querySelector('.hw-toggle');
-  const isOpen=pad.classList.contains('show');
-  if(isOpen){pad.classList.remove('show');btn.classList.remove('on');return}
-  pad.classList.add('show');btn.classList.add('on');
-  // 캔버스 초기화
-  const cvs=document.getElementById('hwCvs_'+p);
-  cvs.width=cvs.parentElement.clientWidth;
-  const ctx=cvs.getContext('2d');
-  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('color-scheme').includes('dark')?'#1a1a1a':'#ffffff';
-  ctx.fillRect(0,0,cvs.width,cvs.height);
-  hwState[p].hasStroke=false;
-  document.getElementById('hwHint_'+p).classList.remove('hide');
-  // 이벤트 등록
-  if(!cvs._bindDone){
-    cvs.addEventListener('pointerdown',e=>hwDown(p,e));
-    cvs.addEventListener('pointermove',e=>hwMove(p,e));
-    cvs.addEventListener('pointerup',e=>hwUp(p,e));
-    cvs.addEventListener('pointerleave',e=>hwUp(p,e));
-    cvs._bindDone=true;
-  }
-}
-function hwDown(p,e){
-  e.preventDefault();
-  const cvs=document.getElementById('hwCvs_'+p),ctx=cvs.getContext('2d');
-  hwState[p].drawing=true;
-  hwState[p].hasStroke=true;
-  document.getElementById('hwHint_'+p).classList.add('hide');
-  const r=cvs.getBoundingClientRect();
-  ctx.beginPath();
-  ctx.moveTo(e.clientX-r.left,e.clientY-r.top);
-  ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('color-scheme').includes('dark')?'#ffffff':'#1c1d1a';
-  ctx.lineWidth=e.pointerType==='pen'?2.5:3;
-  ctx.lineCap='round';ctx.lineJoin='round';
-}
-function hwMove(p,e){
-  if(!hwState[p].drawing)return;e.preventDefault();
-  const cvs=document.getElementById('hwCvs_'+p),ctx=cvs.getContext('2d');
-  const r=cvs.getBoundingClientRect();
-  ctx.lineTo(e.clientX-r.left,e.clientY-r.top);
-  ctx.stroke();
-}
-function hwUp(p,e){hwState[p].drawing=false}
-function hwClear(p){
-  const cvs=document.getElementById('hwCvs_'+p),ctx=cvs.getContext('2d');
-  ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('color-scheme').includes('dark')?'#1a1a1a':'#ffffff';
-  ctx.fillRect(0,0,cvs.width,cvs.height);
-  hwState[p].hasStroke=false;
-  document.getElementById('hwHint_'+p).classList.remove('hide');
-}
-async function hwRecog(p){
-  if(!hwState[p].hasStroke)return toast('먼저 이름을 써주세요');
-  const cvs=document.getElementById('hwCvs_'+p);
-  const dataUrl=cvs.toDataURL('image/png');
-  const base64=dataUrl.split(',')[1];
-  // API 키 확인
-  let apiKey=localStorage.getItem('pearApiKey')||'';
-  // claude.ai 아티팩트 내부 API
-  const isArtifact=typeof window.claude!=='undefined';
-  const okBtn=document.querySelector('#hwPad_'+p+' .hw-ok');
-  okBtn.textContent='인식 중...';okBtn.disabled=true;
-  try{
-    const body={model:'claude-sonnet-4-6',max_tokens:100,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/png',data:base64}},
-        {type:'text',text:'이 손글씨 이미지에 적힌 한국어 이름(사람 이름)을 읽어주세요. 이름 텍스트만 출력하세요. 다른 설명 없이 이름만 답해주세요.'}
-      ]}]};
-    const headers={'Content-Type':'application/json'};
-    if(!isArtifact){
-      if(!apiKey){toast('설정에서 API 키를 등록해주세요');return}
-      headers['x-api-key']=apiKey;
-      headers['anthropic-version']='2023-06-01';
-      headers['anthropic-dangerous-direct-browser-access']='true';
-    }
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,body:JSON.stringify(body)});
-    const data=await res.json();
-    const name=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('').trim();
-    if(name){
-      document.getElementById(p==='s'?'sN':'rN').value=name;
-      hwToggle(p); // 패드 닫기
-      toast('인식 완료: '+name);
-    }else{toast('이름을 인식하지 못했습니다. 다시 써주세요')}
-  }catch(err){console.error(err);toast('인식 실패 — 다시 시도해주세요')}
-  finally{okBtn.textContent='인식';okBtn.disabled=false}
-}
-function saveContact(){} // 호환용 빈 함수
 
 function showEm(){if(!CK.size)return;document.getElementById('eCnt').textContent=CK.size;SE=null;document.querySelectorAll('.eo').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});sm('mEm')}
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
@@ -712,145 +561,8 @@ function doEmManual(){
   cm('mEm');toast('엑셀 다운로드 완료 — Gmail에서 파일을 첨부해주세요');
 }
 
-let ocrData=null,ocrB64='';
-function openCam(){
-  document.getElementById('camStep1').style.display='';
-  document.getElementById('camStep2').style.display='none';
-  document.getElementById('camInPhoto').value='';
-  document.getElementById('camInGallery').value='';
-  ocrData=null;ocrB64='';sm('mCam');
-}
-function camReset(){
-  document.getElementById('camStep1').style.display='';
-  document.getElementById('camStep2').style.display='none';
-  document.getElementById('camInPhoto').value='';
-  document.getElementById('camInGallery').value='';
-  ocrData=null;ocrB64='';
-}
-function camSelected(e){
-  const f=e.target.files[0];if(!f)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    ocrB64=ev.target.result;
-    document.getElementById('camImg').src=ocrB64;
-    document.getElementById('camStep1').style.display='none';
-    document.getElementById('camStep2').style.display='';
-    document.getElementById('ocrResult').style.display='none';
-    document.getElementById('btnOcrApply').textContent='주문서에 적용';
-    runOcr(ocrB64);
-  };reader.readAsDataURL(f);
-}
-async function runOcr(dataUrl){
-  const status=document.getElementById('ocrStatus');
-  const result=document.getElementById('ocrResult');
-  status.style.display='';result.style.display='none';
-  document.getElementById('btnOcrApply').disabled=true;
-  try{
-    const base64=dataUrl.split(',')[1];
-    const mediaType=dataUrl.split(';')[0].split(':')[1]||'image/jpeg';
-    const apiKey=getApiKey();
-    const headers={'Content-Type':'application/json'};
-    if(apiKey)headers['x-api-key']=apiKey;
-    headers['anthropic-version']='2023-06-01';
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers,
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',max_tokens:1000,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-          {type:'text',text:`이 사진은 배 농장 주문서/택배 송장/메모입니다. 사진에서 다음 정보를 추출해서 JSON만 반환해주세요. 마크다운 없이 순수 JSON만 응답하세요.
-{
-  "sender_name":"보내는 사람 이름",
-  "sender_phone":"보내는 사람 전화번호",
-  "sender_addr":"보내는 사람 주소 전체",
-  "receiver_name":"받는 사람 이름",
-  "receiver_phone":"받는 사람 전화번호",
-  "receiver_addr":"받는 사람 주소 전체",
-  "product":"상품명(배 품종 또는 배즙 등)",
-  "quantity":"수량/무게",
-  "note":"비고/메모"
-}
-인식할 수 없는 항목은 빈 문자열로 두세요.`}
-        ]}]
-      })
-    });
-    const data=await resp.json();
-    const txt=data.content.map(c=>c.text||'').join('');
-    const clean=txt.replace(/```json|```/g,'').trim();
-    ocrData=JSON.parse(clean);
-    showOcrResult(ocrData);
-  }catch(err){
-    console.error('OCR error:',err);
-    status.style.display='none';
-    result.style.display='';
-    document.getElementById('ocrPreview').innerHTML='<p style="color:var(--dg)">인식에 실패했습니다. 주문서를 직접 작성해주세요.</p>';
-    ocrData=null;
-  }
-  document.getElementById('btnOcrApply').disabled=false;
-}
-function showOcrResult(d){
-  document.getElementById('ocrStatus').style.display='none';
-  document.getElementById('ocrResult').style.display='';
-  const rows=[
-    ['보내는 분',d.sender_name],['연락처',d.sender_phone],['주소',d.sender_addr],
-    ['받는 분',d.receiver_name],['연락처',d.receiver_phone],['주소',d.receiver_addr],
-    ['상품',d.product],['수량',d.quantity],['비고',d.note]
-  ].filter(r=>r[1]);
-  document.getElementById('ocrPreview').innerHTML=rows.map(r=>`<div class="ocr-row"><span class="ocr-label">${r[0]}</span><span class="ocr-val">${r[1]}</span></div>`).join('');
-  if(rows.length)document.getElementById('btnOcrApply').textContent='인식 정보로 작성';
-  else document.getElementById('btnOcrApply').textContent='직접 작성하기';
-}
-function applyOcr(){
-  cm('mCam');openForm();
-  if(!ocrData)return;
-  // 보내는 사람
-  if(ocrData.sender_name)document.getElementById('sN').value=ocrData.sender_name;
-  if(ocrData.sender_phone){let p=ocrData.sender_phone.replace(/[^0-9]/g,'');document.getElementById('sP').value=p;fmtP(document.getElementById('sP'))}
-  if(ocrData.sender_addr)document.getElementById('sA').value=ocrData.sender_addr;
-  // 받는 사람
-  if(ocrData.receiver_name)document.getElementById('rN').value=ocrData.receiver_name;
-  if(ocrData.receiver_phone){let p=ocrData.receiver_phone.replace(/[^0-9]/g,'');document.getElementById('rP').value=p;fmtP(document.getElementById('rP'))}
-  if(ocrData.receiver_addr)document.getElementById('rA').value=ocrData.receiver_addr;
-  // 상품
-  if(ocrData.product){
-    const prod=ocrData.product.toLowerCase();
-    if(prod.includes('즙')||prod.includes('juice'))pickCat('배즙');
-    else pickCat('배');
-    const fv=document.getElementById('fV');
-    const varieties=['만풍','신고','추황','황금','배즙'];
-    const match=varieties.find(v=>prod.includes(v));
-    if(match){fv.value=match}else if(ocrData.product.trim()){ensureOpt(fv,ocrData.product.trim());fv.value=ocrData.product.trim()}
-  }
-  if(ocrData.quantity){
-    const fq=document.getElementById('fQ');
-    const qNum=ocrData.quantity.replace(/[^0-9]/g,'');
-    if(qNum){ensureOpt(fq,qNum);fq.value=qNum}
-  }
-  if(ocrData.note)document.getElementById('rNo').value=ocrData.note;
-  toast('인식된 정보가 적용되었습니다');
-}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
-// ===== API 키 관리 =====
-function getApiKey(){try{return localStorage.getItem('pearApiKey')||''}catch(e){return ''}}
-function saveApiKey(){
-  const k=document.getElementById('apiKeyInput').value.trim();
-  if(!k)return toast('API 키를 입력해주세요');
-  try{localStorage.setItem('pearApiKey',k)}catch(e){}
-  document.getElementById('apiKeyInput').value='';
-  updateKeyStatus();toast('API 키가 저장되었습니다');
-}
-function clearApiKey(){
-  if(!confirm('API 키를 삭제하시겠습니까?'))return;
-  try{localStorage.removeItem('pearApiKey')}catch(e){}
-  updateKeyStatus();toast('API 키가 삭제되었습니다');
-}
-function updateKeyStatus(){
-  const k=getApiKey();
-  const el=document.getElementById('keyStatus');
-  if(k){el.innerHTML=`<div class="key-status key-ok"><i class="dot"></i>API 키가 설정되어 있습니다 (${k.slice(0,12)}...)</div>`}
-  else{el.innerHTML=`<div class="key-status key-no"><i class="dot"></i>API 키가 설정되지 않았습니다</div>`}
-}
 // ===== 구글 스프레드시트 연동 =====
 function getSheetUrl(){try{return localStorage.getItem('pearSheetUrl')||''}catch(e){return ''}}
 function saveSheetUrl(){
@@ -913,7 +625,7 @@ async function sheetDelete(id){
   try{await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',id})})}catch(e){}
 }
 
-initA();ld();render();updateKeyStatus();updateSheetStatus();
+initA();ld();render();updateSheetStatus();
 // 스프레드시트 연결 시 자동 불러오기
 if(getSheetUrl())syncFromSheet();
 </script>
