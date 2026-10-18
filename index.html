@@ -229,10 +229,12 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   </div>
 </div></div>
 
-<div class="mo" id="mPhView" onclick="if(event.target===this)cm('mPhView')" style="cursor:pointer"><div class="ml" style="background:transparent;box-shadow:none;max-width:95vw;padding:0">
-  <button class="bc" onclick="cm('mPhView')" aria-label="닫기" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(0,0,0,.5);border:none"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-  <img id="phViewImg" style="width:100%;max-height:85vh;object-fit:contain;border-radius:12px;display:block" alt="주문서 사진">
-</div></div>
+<div id="mPhView" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="closePhView()">
+  <button onclick="closePhView()" style="position:fixed;top:env(safe-area-inset-top,12px);right:12px;z-index:10000;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:12px"><svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:20px" onclick="event.stopPropagation()">
+    <img id="phViewImg" style="max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px" alt="주문서 사진" onclick="closePhView()">
+  </div>
+</div>
 
 <div class="mo" id="mPhEdit"><div class="ml sm">
   <div class="mh"><h2>사진 접수 수정</h2><button class="bc" onclick="cm('mPhEdit')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
@@ -372,8 +374,20 @@ const A={
 const EM=['gwang-jin@naver.com','santar7021@gmail.com'],EN=['광진','명진'];
 let O=[],CK=new Set(),CF='all',EI=null,SE=null,openGrps=new Set();
 
-function ld(){try{O=JSON.parse(localStorage.getItem('po3'))||[]}catch(e){O=[]}}
-function sv(){try{localStorage.setItem('po3',JSON.stringify(O))}catch(e){}}
+function ld(){try{O=JSON.parse(localStorage.getItem('po3'))||[]}catch(e){O=[]}restorePhotos()}
+function sv(){
+  try{localStorage.setItem('po3',JSON.stringify(O))}catch(e){}
+  // 사진 데이터 별도 보관 (시트 동기화 시 복원용)
+  const imgs={};O.forEach(o=>{if(o.img)imgs[o.id]=o.img});
+  try{localStorage.setItem('po3img',JSON.stringify(imgs))}catch(e){}
+}
+function restorePhotos(){
+  // 시트 동기화 후 사라진 사진 데이터 복원
+  try{
+    const imgs=JSON.parse(localStorage.getItem('po3img')||'{}');
+    O.forEach(o=>{if(!o.img&&imgs[o.id])o.img=imgs[o.id]});
+  }catch(e){}
+}
 
 // 보내는 사람 키: 성명 + 연락처 끝 4자리
 function senderKey(o){return o.s.nm+'|'+last4(o.s.ph)}
@@ -608,9 +622,15 @@ function saveO(){
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
 function viewPhoto(id){
-  const o=O.find(x=>x.id===id);if(!o||!o.img)return;
+  const o=O.find(x=>x.id===id);
+  if(!o||!o.img){toast('사진 데이터가 없습니다');return}
   document.getElementById('phViewImg').src=o.img;
-  sm('mPhView');
+  document.getElementById('mPhView').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePhView(){
+  document.getElementById('mPhView').style.display='none';
+  document.body.style.overflow='';
 }
 let phEditId=null;
 function edPhoto(id){
@@ -882,7 +902,7 @@ async function syncFromSheet(silent){
     const r=await fetch(u);const data=await r.json();
     if(Array.isArray(data)){
       const changed=JSON.stringify(data)!==JSON.stringify(O);
-      if(changed){O=data;sv();render();if(!silent)toast(`스프레드시트에서 ${data.length}건 불러옴`)}
+      if(changed){O=data;restorePhotos();sv();render();if(!silent)toast(`스프레드시트에서 ${data.length}건 불러옴`)}
       else if(!silent){toast('이미 최신 상태입니다')}
     }
     else if(data.error&&!silent){toast('오류: '+data.error)}
@@ -927,7 +947,7 @@ setInterval(()=>{const u=getSheetUrl();if(u)syncFromSheet(true)},30000);
       const sheetIds=new Set(data.map(o=>o.id));
       const localOnly=O.filter(o=>!sheetIds.has(o.id));
       O=[...data,...localOnly];
-      sv();render();
+      restorePhotos();sv();render();
       // 로컬에만 있던 건을 시트에도 추가
       for(const o of localOnly){await sheetAdd(o)}
       if(localOnly.length)toast(`동기화 완료 (시트 ${data.length}건 + 로컬 ${localOnly.length}건 병합)`);
