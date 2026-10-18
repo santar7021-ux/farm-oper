@@ -229,6 +229,28 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   </div>
 </div></div>
 
+<div class="mo" id="mPhView" onclick="if(event.target===this)cm('mPhView')" style="cursor:pointer"><div class="ml" style="background:transparent;box-shadow:none;max-width:95vw;padding:0">
+  <button class="bc" onclick="cm('mPhView')" aria-label="닫기" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(0,0,0,.5);border:none"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <img id="phViewImg" style="width:100%;max-height:85vh;object-fit:contain;border-radius:12px;display:block" alt="주문서 사진">
+</div></div>
+
+<div class="mo" id="mPhEdit"><div class="ml sm">
+  <div class="mh"><h2>사진 접수 수정</h2><button class="bc" onclick="cm('mPhEdit')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="mb">
+    <div id="phEditImg" class="cam-img" style="margin-bottom:16px"></div>
+    <div class="fc">
+      <h3>보내는 사람</h3>
+      <div class="ag">
+        <div class="fr"><label>성명 <span class="rq">*</span></label><input id="peN" placeholder="이름"></div>
+        <div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="peP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('peP')" readonly><div class="numpad" id="np_peP"></div></div>
+      </div>
+      <div class="fr np-wrap"><label>주문 수량</label><input id="peQt" type="tel" placeholder="숫자 입력" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onfocus="npOpen('peQt')" readonly><div class="numpad" id="np_peQt"></div></div>
+      <div class="fr"><label>비고 (내용)</label><textarea id="peNo" placeholder="주문 내용, 메모 등을 입력하세요" rows="3"></textarea></div>
+    </div>
+  </div>
+  <div class="mf"><button class="bp" onclick="savePhEdit()">저장</button></div>
+</div></div>
+
 <div class="mo" id="mForm"><div class="ml">
   <div class="mh"><h2 id="fTit">주문서 작성</h2><button class="bc" onclick="cm('mForm')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
@@ -408,7 +430,7 @@ function npBuild(id){
 <button type="button" class="np-btn np-done" onclick="npClose('${id}')">완료</button>
 </div>`;
 }
-const npIsQty=id=>id==='csQt'||id==='fAmt'; // 수량 필드 여부
+const npIsQty=id=>id==='csQt'||id==='fAmt'||id==='peQt'; // 수량 필드 여부
 function npOpen(id){
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
   npBuild(id);
@@ -480,7 +502,7 @@ function rList(){
       const ck=CK.has(o.id),unit=o.cat==='배즙'?'박스':'kg',pend=o.st==='접수';
       const isPhoto=o.cat==='사진';
       const photoTag=isPhoto?'<span class="photo-tag">📷 사진</span>':'';
-      const photoThumb=isPhoto&&o.img?`<div class="cam-img" style="margin:8px 0;cursor:pointer" onclick="event.stopPropagation();window.open('${o.img}','_blank')"><img src="${o.img}" alt="주문서 사진" style="max-height:160px"></div>`:'';
+      const photoThumb=isPhoto&&o.img?`<div class="cam-img" style="margin:8px 0;cursor:pointer" onclick="event.stopPropagation();viewPhoto('${o.id}')"><img src="${o.img}" alt="주문서 사진" style="max-height:160px"></div>`:'';
       return`<div class="sub-order ${ck?'on':''}">
         <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
         <div class="sub-info">
@@ -492,7 +514,7 @@ function rList(){
           <div class="sub-ft"><span class="sub-id">#${o.id.slice(-4).toUpperCase()} · ${ds}</span>
             <div class="sub-acts">
               <button class="bs ${pend?'bst':''}" onclick="event.stopPropagation();cyc('${o.id}')">${pend?'완료 처리':'접수로 되돌리기'}</button>
-              ${!isPhoto?`<button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>`:''}
+              ${!isPhoto?`<button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>`:`<button class="bs be" onclick="event.stopPropagation();edPhoto('${o.id}')">수정</button>`}
               <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
             </div>
           </div>
@@ -585,6 +607,36 @@ function saveO(){
   sv();render();cm('mForm');EI=null;
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
+function viewPhoto(id){
+  const o=O.find(x=>x.id===id);if(!o||!o.img)return;
+  document.getElementById('phViewImg').src=o.img;
+  sm('mPhView');
+}
+let phEditId=null;
+function edPhoto(id){
+  const o=O.find(x=>x.id===id);if(!o)return;
+  phEditId=id;
+  document.getElementById('phEditImg').innerHTML=o.img?`<img src="${o.img}" alt="주문서 사진" style="max-height:240px">`:'<p style="padding:20px;text-align:center;color:var(--tl)">사진 없음</p>';
+  document.getElementById('peN').value=o.s.nm||'';
+  document.getElementById('peP').value=o.s.ph||'010-';
+  document.getElementById('peQt').value=o.qt&&o.qt!=='-'?o.qt:'';
+  document.getElementById('peNo').value=o.r.no||'';
+  document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
+  sm('mPhEdit');
+}
+function savePhEdit(){
+  const nm=document.getElementById('peN').value.trim();
+  const ph=document.getElementById('peP').value.trim();
+  if(!nm)return toast('보내는 분 성명을 입력해주세요');
+  if(!ph||ph==='010-')return toast('보내는 분 연락처를 입력해주세요');
+  const idx=O.findIndex(o=>o.id===phEditId);if(idx<0)return;
+  O[idx].s.nm=nm;
+  O[idx].s.ph=ph;
+  O[idx].qt=document.getElementById('peQt').value.trim()||'-';
+  O[idx].r.no=document.getElementById('peNo').value.trim();
+  sv();render();sheetUpdate(O[idx]);
+  cm('mPhEdit');toast('수정 완료');
+}
 function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
 
 
