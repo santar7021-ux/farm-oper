@@ -241,8 +241,9 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
       </div>
       <div class="ag">
         <div class="fr" id="fVWrap"><label>품종 <span class="rq">*</span></label><select id="fV" onchange="customSel(this,'품종 이름을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
-        <div class="fr"><label id="fQLabel">수량 <span class="rq">*</span></label><select id="fQ" onchange="customSel(this,'수량을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
+        <div class="fr"><label id="fQLabel">과수 <span class="rq">*</span></label><select id="fQ" onchange="customSel(this,'과수를 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
       </div>
+      <div class="fr np-wrap"><label>수량 <span class="rq">*</span></label><input id="fAmt" type="tel" placeholder="숫자 입력" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onfocus="npOpen('fAmt')" readonly><div class="numpad" id="np_fAmt"></div></div>
     </div>
     <div class="fc"><h3>보내는 사람</h3>
       <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('sP')" readonly><div class="numpad" id="np_sP"></div></div></div>
@@ -407,7 +408,7 @@ function npBuild(id){
 <button type="button" class="np-btn np-done" onclick="npClose('${id}')">완료</button>
 </div>`;
 }
-const npIsQty=id=>id==='csQt'; // 수량 필드 여부
+const npIsQty=id=>id==='csQt'||id==='fAmt'; // 수량 필드 여부
 function npOpen(id){
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
   npBuild(id);
@@ -483,7 +484,7 @@ function rList(){
       return`<div class="sub-order ${ck?'on':''}">
         <input type="checkbox" ${ck?'checked':''} onchange="event.stopPropagation();tCk('${o.id}')">
         <div class="sub-info">
-          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b>${!isPhoto?`<span class="qt">${o.qt}${unit}</span>`:''}${isPhoto&&o.qt&&o.qt!=='-'?`<span class="qt">수량 ${o.qt}</span>`:''}${photoTag}</div><span class="badge b${o.st}">${o.st}</span></div>
+          <div class="sub-top"><div class="sub-det"><span class="tg">${o.cat||'배'}</span><b>${o.va}</b>${!isPhoto?`<span class="qt">${o.qt}${unit}</span>`:''}${!isPhoto&&o.amt?`<span class="qt">${o.amt}건</span>`:''}${isPhoto&&o.qt&&o.qt!=='-'?`<span class="qt">수량 ${o.qt}</span>`:''}${photoTag}</div><span class="badge b${o.st}">${o.st}</span></div>
           ${isPhoto?'':`<div class="sub-recv"><span class="k">받는 분</span><strong>${o.r.nm}</strong><span class="ph">${last4(o.r.ph)}</span></div>`}
           ${!isPhoto&&ra?`<div class="sub-addr">${ra}</div>`:''}
           ${photoThumb}
@@ -548,6 +549,7 @@ function openForm(d){
   const fvEl=document.getElementById('fV'),fqEl=document.getElementById('fQ');
   if(d?.cat){pickCat(d.cat);if(d.va)ensureOpt(fvEl,d.va);fvEl.value=d?.va||'';if(d.qt)ensureOpt(fqEl,d.qt);fqEl.value=d?.qt||''}
   else{fvEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>';fqEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>'}
+  document.getElementById('fAmt').value=d?.amt||'';
   document.getElementById('sN').value=d?.s?.nm||'';document.getElementById('sP').value=d?.s?.ph||(d?'':'010-');
   sAddr('s',d?.s);document.getElementById('sA').value=d?.s?.dt||'';
   document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||(d?'':'010-');
@@ -571,10 +573,12 @@ function saveO(){
   const va=document.getElementById('fV').value,qt=document.getElementById('fQ').value;
   const sn=document.getElementById('sN').value.trim(),sp=document.getElementById('sP').value.trim();
   const rn=document.getElementById('rN').value.trim(),rp=document.getElementById('rP').value.trim(),rd=document.getElementById('rD').value;
-  if(!va)return toast('품종을 선택해주세요');if(!qt)return toast('수량을 선택해주세요');
+  const amt=document.getElementById('fAmt').value.trim();
+  if(!va)return toast('품종을 선택해주세요');if(!qt)return toast('과수를 선택해주세요');
+  if(!amt)return toast('수량을 입력해주세요');
   if(!sn)return toast('보내는 분 성명 입력');if(!sp)return toast('보내는 분 연락처 입력');
   if(!rn)return toast('받는 분 성명 입력');if(!rp)return toast('받는 분 연락처 입력');if(!rd)return toast('받는 분 주소(도) 선택');
-  const dt={cat:curCat,va,qt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
+  const dt={cat:curCat,va,qt,amt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
     r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
   if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1){Object.assign(O[i],dt);sheetUpdate(O[i])}toast('수정 완료')}
   else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
@@ -601,12 +605,12 @@ function showEm(){
 function sEmS(i,el){SE=i;document.querySelectorAll('.eo').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');el.querySelector('input').checked=true}
 // ===== 엑셀 생성 =====
 function buildExcelData(orders){
-  const rows=[['No','상품구분','품종','과수','단위','보내는분_성명','보내는분_연락처','보내는분_주소','받는분_성명','받는분_연락처','받는분_주소','주문수량','배송메모']];
+  const rows=[['No','상품구분','품종','과수','단위','수량','보내는분_성명','보내는분_연락처','보내는분_주소','받는분_성명','받는분_연락처','받는분_주소','배송메모']];
   orders.forEach((o,i)=>{
     const sA=[o.s.pv,o.s.ci,o.s.su,o.s.dt].filter(Boolean).join(' ');
     const rA=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
     const unit=o.cat==='배즙'?'박스':'kg';
-    rows.push([i+1,o.cat||'배',o.va,o.qt,unit,o.s.nm,o.s.ph,sA,o.r.nm,o.r.ph,rA,o.qt||'',o.r.no||'']);
+    rows.push([i+1,o.cat||'배',o.va,o.qt,unit,o.amt||'',o.s.nm,o.s.ph,sA,o.r.nm,o.r.ph,rA,o.r.no||'']);
   });
   return rows;
 }
@@ -614,7 +618,7 @@ function makeExcelBlob(orders){
   const data=buildExcelData(orders);
   const ws=XLSX.utils.aoa_to_sheet(data);
   // 열 너비 설정
-  ws['!cols']=[{wch:4},{wch:8},{wch:8},{wch:6},{wch:5},{wch:10},{wch:15},{wch:30},{wch:10},{wch:15},{wch:30},{wch:10},{wch:20}];
+  ws['!cols']=[{wch:4},{wch:8},{wch:8},{wch:6},{wch:5},{wch:6},{wch:10},{wch:15},{wch:30},{wch:10},{wch:15},{wch:30},{wch:20}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'주문내역');
   const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
