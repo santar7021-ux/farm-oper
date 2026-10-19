@@ -189,7 +189,10 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
   </div>
   <div id="olist"></div>
 </main>
-<div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>
+<div class="bb hid" id="bbar"><div style="display:flex;gap:8px;width:100%;max-width:680px;margin:0 auto">
+  <button class="bsp" onclick="bulkDelete()" style="flex:0 0 auto;background:var(--dg);padding:0 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff;width:18px;height:18px"><path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+  <button class="bsp" onclick="showEm()" style="flex:1"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
+</div></div>
 
 
 
@@ -658,6 +661,15 @@ function savePhEdit(){
   cm('mPhEdit');toast('수정 완료');
 }
 function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
+function bulkDelete(){
+  if(!CK.size)return;
+  if(!confirm(`선택한 ${CK.size}건을 모두 삭제하시겠습니까?\n삭제된 주문은 복구할 수 없습니다.`))return;
+  const ids=[...CK];
+  O=O.filter(o=>!CK.has(o.id));
+  ids.forEach(id=>sheetDelete(id));
+  CK.clear();sv();render();
+  toast(`${ids.length}건 삭제 완료`);
+}
 
 
 
