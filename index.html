@@ -883,7 +883,11 @@ async function saveSheetUrl(){
   try{
     const r=await fetch(u);const data=await r.json();
     if(Array.isArray(data)){
-      if(data.length>0){O=data;sv();render()}
+      if(data.length>0){
+        const localMap=new Map();O.forEach(o=>localMap.set(o.id,o));
+        data.forEach(o=>{const loc=localMap.get(o.id);if(!o.img&&loc&&loc.img)o.img=loc.img});
+        O=data;restorePhotos();sv();render();
+      }
       toast(`연결 완료! (${data.length}건 동기화)`);
     }else{toast('연결되었지만 데이터를 불러오지 못했습니다')}
   }catch(err){toast('URL 연결 실패 — URL을 확인해주세요')}
@@ -927,7 +931,16 @@ async function syncFromSheet(silent){
     const r=await fetch(u);const data=await r.json();
     if(Array.isArray(data)){
       const changed=JSON.stringify(data)!==JSON.stringify(O);
-      if(changed){O=data;restorePhotos();sv();render();if(!silent)toast(`스프레드시트에서 ${data.length}건 불러옴`)}
+      if(changed){
+        // 로컬 사진을 시트 데이터에 보완
+        const localMap=new Map();O.forEach(o=>localMap.set(o.id,o));
+        data.forEach(o=>{
+          const loc=localMap.get(o.id);
+          if(!o.img&&loc&&loc.img)o.img=loc.img;
+        });
+        O=data;restorePhotos();sv();render();
+        if(!silent)toast(`스프레드시트에서 ${data.length}건 불러옴`);
+      }
       else if(!silent){toast('이미 최신 상태입니다')}
     }
     else if(data.error&&!silent){toast('오류: '+data.error)}
@@ -968,12 +981,21 @@ setInterval(()=>{const u=getSheetUrl();if(u)syncFromSheet(true)},30000);
     const btn=document.getElementById('btnSync');btn.classList.add('spinning');
     const r=await fetch(u);const data=await r.json();
     if(Array.isArray(data)&&data.length>0){
-      // 시트 데이터와 로컬 데이터 병합 (시트 우선, 로컬에만 있는 건 추가)
+      // 시트 데이터와 로컬 데이터 병합
+      const localMap=new Map();O.forEach(o=>localMap.set(o.id,o));
       const sheetIds=new Set(data.map(o=>o.id));
       const localOnly=O.filter(o=>!sheetIds.has(o.id));
+      // 시트 데이터에 로컬 사진 보완
+      data.forEach(o=>{
+        const loc=localMap.get(o.id);
+        if(!o.img&&loc&&loc.img){
+          o.img=loc.img;
+          // 로컬에만 있는 사진 URL을 시트에도 업데이트
+          sheetUpdate(o);
+        }
+      });
       O=[...data,...localOnly];
       restorePhotos();sv();render();
-      // 로컬에만 있던 건을 시트에도 추가
       for(const o of localOnly){await sheetAdd(o)}
       if(localOnly.length)toast(`동기화 완료 (시트 ${data.length}건 + 로컬 ${localOnly.length}건 병합)`);
     }else if(Array.isArray(data)&&data.length===0&&O.length>0){
