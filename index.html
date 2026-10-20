@@ -730,58 +730,21 @@ function downloadExcel(orders){
 async function doEmAll(){
   if(SE===null)return toast('받는 분을 선택해주세요');
   const ck=O.filter(o=>CK.has(o.id));if(!ck.length)return;
-  const directOrders=ck.filter(o=>o.cat!=='사진');
-  const photoOrders=ck.filter(o=>o.cat==='사진');
   const u=getSheetUrl();
+  if(!u)return toast('스프레드시트 연결이 필요합니다');
   const btn=document.getElementById('btnEmSend');
   btn.disabled=true;btn.textContent='발송 중...';
-  let ok=false;
   try{
-    // 직접 접수 → 엑셀 첨부 메일 자동 발송
-    if(directOrders.length){
-      try{
-        const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
-          body:JSON.stringify({action:'sendEmail',orders:directOrders,toEmail:EM[SE],toName:EN[SE]})});
-        const data=await r.json();
-        if(!data.ok)toast('엑셀 발송 실패: '+(data.error||''));
-      }catch(err){console.error(err);toast('엑셀 발송 오류')}
-    }
-    // 통합 메일 본문 (직접+사진 모두 포함)
-    let body='안녕하세요, 광진농원입니다.\n\n택배 전달 주문 총 '+ck.length+'건을 전달합니다.\n\n';
-    if(directOrders.length){
-      body+='━━ 직접 접수 ('+directOrders.length+'건) ━━\n';
-      body+='※ 엑셀 파일이 별도 메일로 자동 발송되었습니다.\n\n';
-      directOrders.forEach((o,i)=>{
-        const rA=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
-        const unit=o.cat==='배즙'?'박스':'kg';
-        body+='['+(i+1)+'] '+(o.cat||'배')+' '+o.va+' '+o.qt+unit;
-        if(o.amt)body+=' × '+o.amt+'건';
-        body+='\n    받는 분: '+o.r.nm+' ('+o.r.ph+')\n    주소: '+rA+'\n';
-        if(o.r.no)body+='    메모: '+o.r.no+'\n';
-        body+='\n';
-      });
-    }
-    if(photoOrders.length){
-      body+='━━ 사진 접수 ('+photoOrders.length+'건) ━━\n\n';
-      photoOrders.forEach((o,i)=>{
-        body+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')';
-        if(o.qt&&o.qt!=='-')body+=' / 주문 수량: '+o.qt;
-        body+='\n';
-        if(o.r.no)body+='    내용: '+o.r.no+'\n';
-        if(o.img&&o.img.startsWith('http'))body+='    사진: '+o.img+'\n';
-        body+='\n';
-      });
-    }
-    body+='감사합니다.';
-    // Gmail 통합 메일 열기
-    const su=encodeURIComponent(`[광진농원] 택배 전달 (${ck.length}건)`);
-    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su}&body=${encodeURIComponent(body)}`,'_blank');
-    ok=true;
-    // 상태 변경
-    ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
-    sv();render();cm('mEm');
-    toast(`${EN[SE]}님에게 ${ck.length}건 전달 완료`);
-  }catch(err){console.error(err);toast('발송 중 오류 발생')}
+    // 직접+사진 전체를 Apps Script로 한번에 발송
+    const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'sendEmail',orders:ck,toEmail:EM[SE],toName:EN[SE]})});
+    const data=await r.json();
+    if(data.ok){
+      ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
+      sv();render();cm('mEm');
+      toast(`${EN[SE]}님에게 ${ck.length}건 메일 발송 완료`);
+    }else{toast('발송 실패: '+(data.error||'알 수 없음'))}
+  }catch(err){console.error(err);toast('메일 발송 중 오류 발생')}
   btn.disabled=false;btn.innerHTML='<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>메일 발송';
 }
 
