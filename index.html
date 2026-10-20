@@ -495,23 +495,21 @@ function rList(){
   const groups={};
   filtered.forEach(o=>{const k=senderKey(o);if(!groups[k])groups[k]=[];groups[k].push(o)});
   const sortedKeys=Object.keys(groups).sort((a,b)=>{
-    const la=groups[a].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
-    const lb=groups[b].reduce((m,o)=>Math.max(m,new Date(o.ca)),0);
+    const la=groups[a].reduce((m,o)=>{const d=safeDate(o.ca);return d?Math.max(m,d.getTime()):m},0);
+    const lb=groups[b].reduce((m,o)=>{const d=safeDate(o.ca);return d?Math.max(m,d.getTime()):m},0);
     return lb-la;
   });
   el.innerHTML=sortedKeys.map(k=>{
-    const items=groups[k].sort((a,b)=>new Date(b.ca)-new Date(a.ca));
+    const items=groups[k].sort((a,b)=>(safeDate(b.ca)||0)-(safeDate(a.ca)||0));
     const first=items[0],nm=first.s.nm,ph4=last4(first.s.ph),isOpen=openGrps.has(k);
     const allChecked=items.every(o=>CK.has(o.id));
     const 접수cnt=items.filter(o=>o.st==='접수').length,완료cnt=items.filter(o=>o.st==='접수완료').length;
-    const d0=new Date(first.ca);
-    const dstr=String(d0.getFullYear()).slice(2)+'.'+Z(d0.getMonth()+1)+'.'+Z(d0.getDate())+' '+Z(d0.getHours())+':'+Z(d0.getMinutes());
+    const dstr=fmtDate(first.ca,true);
     let badges='';
     if(접수cnt)badges+=`<span class="badge b접수">접수 ${접수cnt}</span>`;
     if(완료cnt)badges+=`<span class="badge b접수완료">완료 ${완료cnt}</span>`;
     const subHtml=items.map(o=>{
-      const d=new Date(o.ca);
-      const ds=`${d.getMonth()+1}/${d.getDate()} ${Z(d.getHours())}:${Z(d.getMinutes())}`;
+      const ds=fmtDate(o.ca,false);
       const ra=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
       const ck=CK.has(o.id),unit=o.cat==='배즙'?'박스':'kg',pend=o.st==='접수';
       const isPhoto=o.cat==='사진';
@@ -560,6 +558,17 @@ function rList(){
 }
 
 function Z(n){return String(n).padStart(2,'0')}
+function safeDate(v){
+  if(!v)return null;
+  const d=new Date(v);
+  return isNaN(d.getTime())?null:d;
+}
+function fmtDate(v,full){
+  const d=safeDate(v);
+  if(!d)return '-';
+  if(full)return d.getFullYear().toString().slice(2)+'.'+Z(d.getMonth()+1)+'.'+Z(d.getDate())+' '+Z(d.getHours())+':'+Z(d.getMinutes());
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+Z(d.getHours())+':'+Z(d.getMinutes());
+}
 function togGrp(k){openGrps.has(k)?openGrps.delete(k):openGrps.add(k);rList()}
 function togGrpCk(k,checked){
   const items=O.filter(o=>senderKey(o)===k);
