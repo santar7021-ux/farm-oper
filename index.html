@@ -184,15 +184,12 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 </div></header>
 <main class="wrap">
   <div class="st" id="stats"></div>
-  <div class="lh"><label class="chk"><input type="checkbox" id="selAll" onchange="togAll()">전체 선택</label>
+  <div class="lh"><label class="chk"><input type="checkbox" id="selAll" onchange="togAll()">전체 선택</label><button class="bp s dgr" id="btnBulkDel" style="display:none;padding:6px 14px;font-size:13px" onclick="bulkDelete()">삭제</button>
     <div class="fb"><button class="ft on" onclick="filt('all',this)">전체</button><button class="ft" onclick="filt('접수',this)">접수</button><button class="ft" onclick="filt('접수완료',this)">접수완료</button></div>
   </div>
   <div id="olist"></div>
 </main>
-<div class="bb hid" id="bbar"><div style="display:flex;gap:8px;width:100%;max-width:680px;margin:0 auto">
-  <button class="bsp" onclick="bulkDelete()" style="flex:0 0 auto;background:var(--dg);padding:0 16px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff;width:18px;height:18px"><path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
-  <button class="bsp" onclick="showEm()" style="flex:1"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button>
-</div></div>
+<div class="bb hid" id="bbar"><button class="bsp" onclick="showEm()"><span class="bsp-l"><span class="cc" id="cCnt">0</span>건 선택됨</span><span class="bsp-r">택배 전달<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></button></div>
 
 
 
@@ -575,7 +572,7 @@ function togGrpCk(k,checked){
 function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;o.st=o.st==='접수'?'접수완료':'접수';sv();render();sheetUpdate(o);toast(`상태: "${o.st}"`)}
 function tCk(id){CK.has(id)?CK.delete(id):CK.add(id);render()}
 function togAll(){const a=document.getElementById('selAll').checked;const f=CF==='all'?O:O.filter(o=>o.st===CF);a?f.forEach(o=>CK.add(o.id)):CK.clear();render();document.getElementById('selAll').checked=a}
-function uBB(){const b=document.getElementById('bbar'),c=CK.size;c>0?(b.classList.remove('hid'),document.getElementById('cCnt').textContent=c):b.classList.add('hid')}
+function uBB(){const b=document.getElementById('bbar'),c=CK.size;c>0?(b.classList.remove('hid'),document.getElementById('cCnt').textContent=c):b.classList.add('hid');document.getElementById('btnBulkDel').style.display=c>0?'inline-flex':'none'}
 function filt(f,btn){CF=f;document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));btn.classList.add('on');CK.clear();document.getElementById('selAll').checked=false;render()}
 
 function sm(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden'}
@@ -729,46 +726,52 @@ async function doEmAll(){
   const u=getSheetUrl();
   const btn=document.getElementById('btnEmSend');
   btn.disabled=true;btn.textContent='발송 중...';
-  let sentCount=0;
+  let ok=false;
   try{
-    // 1) 직접 접수 → 엑셀 첨부 메일 (Apps Script 경유)
-    if(directOrders.length&&u){
-      const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
-        body:JSON.stringify({action:'sendEmail',orders:directOrders,toEmail:EM[SE],toName:EN[SE]})});
-      const data=await r.json();
-      if(data.ok)sentCount+=directOrders.length;
-      else toast('직접 접수 발송 실패: '+(data.error||''));
-    }else if(directOrders.length&&!u){
-      // Apps Script 미설정 시 엑셀 다운로드 + Gmail
-      downloadExcel(directOrders);
-      const su=encodeURIComponent(`[광진농원] 택배 전달 - 직접 접수 (${directOrders.length}건)`);
-      const body=encodeURIComponent(`안녕하세요, 광진농원입니다.\n\n직접 접수 주문 ${directOrders.length}건을 첨부합니다.\n다운로드된 엑셀 파일을 첨부해주세요.\n\n감사합니다.`);
-      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su}&body=${body}`,'_blank');
-      sentCount+=directOrders.length;
+    // 직접 접수 → 엑셀 첨부 메일 자동 발송
+    if(directOrders.length){
+      try{
+        const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify({action:'sendEmail',orders:directOrders,toEmail:EM[SE],toName:EN[SE]})});
+        const data=await r.json();
+        if(!data.ok)toast('엑셀 발송 실패: '+(data.error||''));
+      }catch(err){console.error(err);toast('엑셀 발송 오류')}
     }
-    // 2) 사진 접수 → 이미지+비고 메일 (Gmail compose)
-    if(photoOrders.length){
-      let photoBody='안녕하세요, 광진농원입니다.\n\n사진 접수 주문 '+photoOrders.length+'건을 전달합니다.\n\n';
-      photoOrders.forEach((o,i)=>{
-        photoBody+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')';
-        if(o.qt&&o.qt!=='-')photoBody+=' / 주문 수량: '+o.qt;
-        photoBody+='\n';
-        if(o.r.no)photoBody+='    내용: '+o.r.no+'\n';
-        if(o.img&&o.img.startsWith('http'))photoBody+='    사진: '+o.img+'\n';
-        photoBody+='\n';
+    // 통합 메일 본문 (직접+사진 모두 포함)
+    let body='안녕하세요, 광진농원입니다.\n\n택배 전달 주문 총 '+ck.length+'건을 전달합니다.\n\n';
+    if(directOrders.length){
+      body+='━━ 직접 접수 ('+directOrders.length+'건) ━━\n';
+      body+='※ 엑셀 파일이 별도 메일로 자동 발송되었습니다.\n\n';
+      directOrders.forEach((o,i)=>{
+        const rA=[o.r.pv,o.r.ci,o.r.su,o.r.dt].filter(Boolean).join(' ');
+        const unit=o.cat==='배즙'?'박스':'kg';
+        body+='['+(i+1)+'] '+(o.cat||'배')+' '+o.va+' '+o.qt+unit;
+        if(o.amt)body+=' × '+o.amt+'건';
+        body+='\n    받는 분: '+o.r.nm+' ('+o.r.ph+')\n    주소: '+rA+'\n';
+        if(o.r.no)body+='    메모: '+o.r.no+'\n';
+        body+='\n';
       });
-      photoBody+='감사합니다.';
-      const su2=encodeURIComponent(`[광진농원] 택배 전달 - 사진 접수 (${photoOrders.length}건)`);
-      setTimeout(()=>{
-        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su2}&body=${encodeURIComponent(photoBody)}`,'_blank');
-      },500);
-      sentCount+=photoOrders.length;
     }
-    if(sentCount){
-      ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
-      sv();render();cm('mEm');
-      toast(`${EN[SE]}님에게 ${sentCount}건 전달 완료`);
+    if(photoOrders.length){
+      body+='━━ 사진 접수 ('+photoOrders.length+'건) ━━\n\n';
+      photoOrders.forEach((o,i)=>{
+        body+='['+(i+1)+'] '+o.s.nm+' ('+o.s.ph+')';
+        if(o.qt&&o.qt!=='-')body+=' / 주문 수량: '+o.qt;
+        body+='\n';
+        if(o.r.no)body+='    내용: '+o.r.no+'\n';
+        if(o.img&&o.img.startsWith('http'))body+='    사진: '+o.img+'\n';
+        body+='\n';
+      });
     }
+    body+='감사합니다.';
+    // Gmail 통합 메일 열기
+    const su=encodeURIComponent(`[광진농원] 택배 전달 (${ck.length}건)`);
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${EM[SE]}&su=${su}&body=${encodeURIComponent(body)}`,'_blank');
+    ok=true;
+    // 상태 변경
+    ck.forEach(o=>{const idx=O.findIndex(x=>x.id===o.id);if(idx>-1)O[idx].st='접수완료'});
+    sv();render();cm('mEm');
+    toast(`${EN[SE]}님에게 ${ck.length}건 전달 완료`);
   }catch(err){console.error(err);toast('발송 중 오류 발생')}
   btn.disabled=false;btn.innerHTML='<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#fff"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>메일 발송';
 }
