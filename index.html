@@ -627,7 +627,7 @@ function addRecv(r){
   document.getElementById('recvList').insertAdjacentHTML('beforeend',recvHtml(idx,r));
   // 주소 드롭다운 초기화
   const dEl=document.getElementById('rD_'+idx);
-  AD.forEach(p=>{const o=document.createElement('option');o.value=o.textContent=p.n;dEl.appendChild(o)});
+  Object.keys(A).sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;dEl.appendChild(o)});
   if(r?.pv){
     dEl.value=r.pv;onDoR(idx);
     setTimeout(()=>{
@@ -645,21 +645,20 @@ function delRecv(idx){
 function onDoR(idx){
   const dv=document.getElementById('rD_'+idx).value;
   const cEl=document.getElementById('rC_'+idx),gEl=document.getElementById('rG_'+idx);
-  cEl.innerHTML='<option value="">시 / 군 / 구</option>';gEl.innerHTML='<option value="">구 / 읍면동</option>';
+  cEl.innerHTML='<option value="">시/군/구</option>';gEl.innerHTML='<option value="">구/읍면동</option>';
   cEl.disabled=true;gEl.disabled=true;
-  if(!dv)return;
-  const p=AD.find(x=>x.n===dv);if(!p)return;
-  p.c.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c.n;cEl.appendChild(o)});
+  if(!dv||!A[dv])return;
+  Object.keys(A[dv]).sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cEl.appendChild(o)});
   cEl.disabled=false;
 }
 function onCiR(idx){
   const dv=document.getElementById('rD_'+idx).value,cv=document.getElementById('rC_'+idx).value;
   const gEl=document.getElementById('rG_'+idx);
-  gEl.innerHTML='<option value="">구 / 읍면동</option>';gEl.disabled=true;
-  if(!dv||!cv)return;
-  const p=AD.find(x=>x.n===dv);if(!p)return;
-  const c=p.c.find(x=>x.n===cv);if(!c||!c.s)return;
-  c.s.forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;gEl.appendChild(o)});
+  gEl.innerHTML='<option value="">구/읍면동</option>';gEl.disabled=true;
+  if(!dv||!cv||!A[dv]?.[cv])return;
+  const subs=A[dv][cv]||[];
+  if(!subs.length)return;
+  subs.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;gEl.appendChild(o)});
   gEl.disabled=false;
 }
 function getRecvCards(){
