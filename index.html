@@ -75,7 +75,7 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 .sep{width:3px;height:3px;border-radius:50%;background:var(--tm)}
 .grp-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
-.b접수{background:var(--al);color:var(--at)}.b접수완료{background:var(--pl);color:var(--pd)}
+.b접수{background:var(--al);color:var(--at)}.b접수완료{background:var(--pl);color:var(--pd)}.b재발송{background:#fff3e0;color:#e65100}
 .grp-arrow{color:var(--tm);display:flex;transition:transform .2s}.grp-arrow.open{transform:rotate(180deg)}
 .grp-body{display:none;border-top:1px solid var(--bd2);background:var(--sf2)}.grp-body.open{display:block}
 .sub-order{display:flex;align-items:flex-start;gap:14px;padding:14px 14px 14px 16px;transition:background .15s}
@@ -158,6 +158,11 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 /* 사진 접수 */
 .cam-img{border-radius:12px;overflow:hidden;border:1px solid var(--bd);margin-bottom:16px;background:var(--sf2)}.cam-img img{width:100%;display:block;max-height:320px;object-fit:contain}
 .photo-tag{display:inline-flex;align-items:center;gap:4px;background:var(--al);color:var(--at);font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;margin-left:6px}
+.recv-card{border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;position:relative;background:var(--sf)}
+.recv-card .recv-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.recv-card .recv-no{font-size:13px;font-weight:700;color:var(--pr);background:var(--pl);padding:2px 10px;border-radius:6px}
+.recv-card .recv-del{width:32px;height:32px;border-radius:8px;background:none;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tl);font-size:16px}
+.recv-card .recv-del:hover{background:#fee;border-color:var(--dg);color:var(--dg)}
 .btn-sync{position:relative}
 .sync-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;border:2px solid var(--sf)}
 .sync-dot.on{background:#4caf50}.sync-dot.off{background:#f44336}
@@ -239,7 +244,13 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
 <div class="mo" id="mPhEdit"><div class="ml sm">
   <div class="mh"><h2>사진 접수 수정</h2><button class="bc" onclick="cm('mPhEdit')" aria-label="닫기"><svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="mb">
-    <div id="phEditImg" class="cam-img" style="margin-bottom:16px"></div>
+    <div id="phEditImg" class="cam-img" style="margin-bottom:8px"></div>
+    <input type="file" accept="image/*" capture="environment" id="pePhotoIn" style="display:none" onchange="pePhotoChanged(event)">
+    <input type="file" accept="image/*" id="peGalleryIn" style="display:none" onchange="pePhotoChanged(event)">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button type="button" class="bp s sec" onclick="document.getElementById('pePhotoIn').click()" style="flex:1;padding:10px 0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin-right:4px"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>재촬영</button>
+      <button type="button" class="bp s sec" onclick="document.getElementById('peGalleryIn').click()" style="flex:1;padding:10px 0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px;margin-right:4px"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.75"/><path d="m20.5 15.5-4.5-4.5-9 8.5"/></svg>갤러리 변경</button>
+    </div>
     <div class="fc">
       <h3>보내는 사람</h3>
       <div class="ag">
@@ -267,7 +278,6 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
         <div class="fr" id="fVWrap"><label>품종 <span class="rq">*</span></label><select id="fV" onchange="customSel(this,'품종 이름을 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
         <div class="fr"><label id="fQLabel">과수 <span class="rq">*</span></label><select id="fQ" onchange="customSel(this,'과수를 입력하세요:')"><option value="">상품 구분을 먼저 선택하세요</option></select></div>
       </div>
-      <div class="fr np-wrap"><label>수량 <span class="rq">*</span></label><input id="fAmt" type="tel" placeholder="숫자 입력" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onfocus="npOpen('fAmt')" readonly><div class="numpad" id="np_fAmt"></div></div>
     </div>
     <div class="fc"><h3>보내는 사람</h3>
       <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="sN" placeholder="이름"></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="sP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('sP')" readonly><div class="numpad" id="np_sP"></div></div></div>
@@ -277,14 +287,12 @@ input[type=checkbox],input[type=radio]{width:20px;height:20px;accent-color:var(-
         <input id="sA" placeholder="상세주소">
       </div>
     </div>
-    <div class="fc"><h3>받는 사람</h3>
-      <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN" placeholder="이름"></div><div class="fr np-wrap"><label>연락처 <span class="rq">*</span></label><input id="rP" type="tel" placeholder="010-0000-0000" oninput="fmtP(this)" onfocus="npOpen('rP')" readonly><div class="numpad" id="np_rP"></div></div></div>
-      <div class="fr"><label>주소 <span class="rq">*</span></label>
-        <div class="ag3"><select id="rD" onchange="onDo('r')"><option value="">도 / 시</option></select><select id="rC" disabled onchange="onCi('r')"><option value="">시 / 군 / 구</option></select><select id="rG" disabled onchange="onSub(this)"><option value="">구 / 읍면동</option></select></div>
-        <div class="addr-hint" id="rHint"></div>
-        <input id="rA" placeholder="상세주소">
+    <div class="fc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">받는 사람</h3>
+        <button type="button" class="bp s sec" onclick="addRecv()" style="padding:6px 12px;font-size:13px">+ 받는 사람 추가</button>
       </div>
-      <div class="fr"><label>배송 메모</label><textarea id="rNo" placeholder="예) 부재 시 경비실에 맡겨주세요"></textarea></div>
+      <div id="recvList"></div>
     </div>
   </div>
   <div class="mf"><button class="bp" onclick="saveO()">저장하기</button></div>
@@ -484,13 +492,13 @@ document.addEventListener('click',function(e){
 function render(){rStats();rList();uBB()}
 const IC={chev:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',box:'<svg class="i " viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg>'};
 function rStats(){
-  const t=O.length,a=O.filter(o=>o.st==='접수').length,b=O.filter(o=>o.st==='접수완료').length;
+  const t=O.length,a=O.filter(o=>o.st==='접수'||o.st==='재발송').length,b=O.filter(o=>o.st==='접수완료').length;
   const g=new Set(O.map(senderKey)).size;
   document.getElementById('stats').innerHTML=[[t,'전체 주문',''],[g,'주문자',''],[a,'접수','pend'],[b,'접수완료','done']].map(([n,l,c])=>`<div class="sc"><div class="l">${c?`<i class="dot ${c}"></i>`:''}${l}</div><div class="n">${n}</div></div>`).join('');
 }
 function rList(){
   const el=document.getElementById('olist');
-  let filtered=CF==='all'?[...O]:O.filter(o=>o.st===CF);
+  let filtered=CF==='all'?[...O]:CF==='접수'?O.filter(o=>o.st==='접수'||o.st==='재발송'):O.filter(o=>o.st===CF);
   if(!filtered.length){el.innerHTML=`<div class="es"><div class="ic">${IC.box}</div><p class="t">등록된 주문이 없습니다</p><p>상단의 <b>접수</b> 버튼으로 주문을 추가하세요.</p></div>`;return}
   const groups={};
   filtered.forEach(o=>{const k=senderKey(o);if(!groups[k])groups[k]=[];groups[k].push(o)});
@@ -503,10 +511,11 @@ function rList(){
     const items=groups[k].sort((a,b)=>(safeDate(b.ca)||0)-(safeDate(a.ca)||0));
     const first=items[0],nm=first.s.nm,ph4=last4(first.s.ph),isOpen=openGrps.has(k);
     const allChecked=items.every(o=>CK.has(o.id));
-    const 접수cnt=items.filter(o=>o.st==='접수').length,완료cnt=items.filter(o=>o.st==='접수완료').length;
+    const 접수cnt=items.filter(o=>o.st==='접수').length,완료cnt=items.filter(o=>o.st==='접수완료').length,재발송cnt=items.filter(o=>o.st==='재발송').length;
     const dstr=fmtDate(first.ca,true);
     let badges='';
     if(접수cnt)badges+=`<span class="badge b접수">접수 ${접수cnt}</span>`;
+    if(재발송cnt)badges+=`<span class="badge b재발송">재발송 ${재발송cnt}</span>`;
     if(완료cnt)badges+=`<span class="badge b접수완료">완료 ${완료cnt}</span>`;
     const subHtml=items.map(o=>{
       const ds=fmtDate(o.ca,false);
@@ -525,7 +534,7 @@ function rList(){
           ${o.r.no?`<div class="sub-note">${o.r.no}</div>`:''}
           <div class="sub-ft"><span class="sub-id">#${o.id.slice(-4).toUpperCase()} · ${ds}</span>
             <div class="sub-acts">
-              <button class="bs ${pend?'bst':''}" onclick="event.stopPropagation();cyc('${o.id}')">${pend?'완료 처리':'접수로 되돌리기'}</button>
+              <button class="bs ${pend?'bst':''}" onclick="event.stopPropagation();cyc('${o.id}')">${o.st==='접수'?'완료 처리':o.st==='재발송'?'재발송 필요':'접수로 되돌리기'}</button>
               ${!isPhoto?`<button class="bs be" onclick="event.stopPropagation();edO('${o.id}')">수정</button>`:`<button class="bs be" onclick="event.stopPropagation();edPhoto('${o.id}')">수정</button>`}
               <button class="bs bd" onclick="event.stopPropagation();dlO('${o.id}')">삭제</button>
             </div>
@@ -582,36 +591,116 @@ function togGrp(k){openGrps.has(k)?openGrps.delete(k):openGrps.add(k);rList()}
 function togGrpCk(k,checked){
   const items=O.filter(o=>senderKey(o)===k);
   // 필터 적용
-  const filtered=CF==='all'?items:items.filter(o=>o.st===CF);
+  const filtered=CF==='all'?items:CF==='접수'?items.filter(o=>o.st==='접수'||o.st==='재발송'):items.filter(o=>o.st===CF);
   filtered.forEach(o=>{checked?CK.add(o.id):CK.delete(o.id)});
   render();
 }
 
-function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;o.st=o.st==='접수'?'접수완료':'접수';sv();render();sheetUpdate(o);toast(`상태: "${o.st}"`)}
+function cyc(id){const o=O.find(x=>x.id===id);if(!o)return;
+  if(o.st==='접수'||o.st==='재발송')o.st='접수완료';
+  else o.st='접수';
+  sv();render();sheetUpdate(o);toast(`상태: "${o.st}"`)}
 function tCk(id){CK.has(id)?CK.delete(id):CK.add(id);render()}
-function togAll(){const a=document.getElementById('selAll').checked;const f=CF==='all'?O:O.filter(o=>o.st===CF);a?f.forEach(o=>CK.add(o.id)):CK.clear();render();document.getElementById('selAll').checked=a}
+function togAll(){const a=document.getElementById('selAll').checked;const f=CF==='all'?O:CF==='접수'?O.filter(o=>o.st==='접수'||o.st==='재발송'):O.filter(o=>o.st===CF);a?f.forEach(o=>CK.add(o.id)):CK.clear();render();document.getElementById('selAll').checked=a}
 function uBB(){const b=document.getElementById('bbar'),c=CK.size;c>0?(b.classList.remove('hid'),document.getElementById('cCnt').textContent=c):b.classList.add('hid');document.getElementById('btnBulkDel').style.display=c>0?'inline-flex':'none'}
 function filt(f,btn){CF=f;document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));btn.classList.add('on');CK.clear();document.getElementById('selAll').checked=false;render()}
 
 function sm(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden'}
 function cm(id){document.getElementById(id).classList.remove('show');document.body.style.overflow=''}
+let recvCount=0;
+function recvHtml(idx,r){
+  const isFirst=idx===0;
+  return `<div class="recv-card" id="recv_${idx}">
+    <div class="recv-hd"><span class="recv-no">받는 사람 ${idx+1}</span>${!isFirst?`<button type="button" class="recv-del" onclick="delRecv(${idx})" title="삭제">✕</button>`:''}</div>
+    <div class="ag"><div class="fr"><label>성명 <span class="rq">*</span></label><input id="rN_${idx}" placeholder="이름" value="${r?.nm||''}"></div>
+    <div class="fr"><label>연락처 <span class="rq">*</span></label><input id="rP_${idx}" type="tel" inputmode="numeric" placeholder="010-0000-0000" value="${r?.ph||(r?'':'010-')}" oninput="fmtP(this)"></div></div>
+    <div class="fr"><label>주소 <span class="rq">*</span></label>
+      <div class="ag3"><select id="rD_${idx}" onchange="onDoR(${idx})"><option value="">도 / 시</option></select><select id="rC_${idx}" disabled onchange="onCiR(${idx})"><option value="">시 / 군 / 구</option></select><select id="rG_${idx}" disabled><option value="">구 / 읍면동</option></select></div>
+      <input id="rA_${idx}" placeholder="상세주소" value="${r?.dt||''}">
+    </div>
+    <div class="ag"><div class="fr"><label>받는 수량 <span class="rq">*</span></label><input id="rAmt_${idx}" type="tel" inputmode="numeric" placeholder="숫자" value="${r?._amt||''}" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+    <div class="fr"><label>배송 메모</label><input id="rNo_${idx}" placeholder="비고" value="${r?.no||''}"></div></div>
+  </div>`;
+}
+function addRecv(r){
+  const idx=recvCount++;
+  document.getElementById('recvList').insertAdjacentHTML('beforeend',recvHtml(idx,r));
+  // 주소 드롭다운 초기화
+  const dEl=document.getElementById('rD_'+idx);
+  AD.forEach(p=>{const o=document.createElement('option');o.value=o.textContent=p.n;dEl.appendChild(o)});
+  if(r?.pv){
+    dEl.value=r.pv;onDoR(idx);
+    setTimeout(()=>{
+      if(r.ci){document.getElementById('rC_'+idx).value=r.ci;onCiR(idx);
+        setTimeout(()=>{if(r.su)document.getElementById('rG_'+idx).value=r.su},50);
+      }
+    },50);
+  }
+  return idx;
+}
+function delRecv(idx){
+  const el=document.getElementById('recv_'+idx);
+  if(el)el.remove();
+}
+function onDoR(idx){
+  const dv=document.getElementById('rD_'+idx).value;
+  const cEl=document.getElementById('rC_'+idx),gEl=document.getElementById('rG_'+idx);
+  cEl.innerHTML='<option value="">시 / 군 / 구</option>';gEl.innerHTML='<option value="">구 / 읍면동</option>';
+  cEl.disabled=true;gEl.disabled=true;
+  if(!dv)return;
+  const p=AD.find(x=>x.n===dv);if(!p)return;
+  p.c.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c.n;cEl.appendChild(o)});
+  cEl.disabled=false;
+}
+function onCiR(idx){
+  const dv=document.getElementById('rD_'+idx).value,cv=document.getElementById('rC_'+idx).value;
+  const gEl=document.getElementById('rG_'+idx);
+  gEl.innerHTML='<option value="">구 / 읍면동</option>';gEl.disabled=true;
+  if(!dv||!cv)return;
+  const p=AD.find(x=>x.n===dv);if(!p)return;
+  const c=p.c.find(x=>x.n===cv);if(!c||!c.s)return;
+  c.s.forEach(s=>{const o=document.createElement('option');o.value=o.textContent=s;gEl.appendChild(o)});
+  gEl.disabled=false;
+}
+function getRecvCards(){
+  const cards=document.querySelectorAll('.recv-card');
+  const result=[];
+  cards.forEach(card=>{
+    const idx=card.id.split('_')[1];
+    result.push({
+      nm:document.getElementById('rN_'+idx)?.value.trim()||'',
+      ph:document.getElementById('rP_'+idx)?.value.trim()||'',
+      pv:document.getElementById('rD_'+idx)?.value||'',
+      ci:document.getElementById('rC_'+idx)?.value||'',
+      su:document.getElementById('rG_'+idx)?.value||'',
+      dt:document.getElementById('rA_'+idx)?.value.trim()||'',
+      _amt:document.getElementById('rAmt_'+idx)?.value.trim()||'',
+      no:document.getElementById('rNo_'+idx)?.value.trim()||''
+    });
+  });
+  return result;
+}
+
 function openForm(d){
   EI=d?d.id:null;document.getElementById('fTit').textContent=EI?'주문서 수정':'주문서 작성';
-  // 카테고리 복원
   curCat='';
   document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('on'));
   const fvEl=document.getElementById('fV'),fqEl=document.getElementById('fQ');
   if(d?.cat){pickCat(d.cat);if(d.va)ensureOpt(fvEl,d.va);fvEl.value=d?.va||'';if(d.qt)ensureOpt(fqEl,d.qt);fqEl.value=d?.qt||''}
   else{fvEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>';fqEl.innerHTML='<option value="">상품 구분을 먼저 선택하세요</option>'}
-  document.getElementById('fAmt').value=d?.amt||'';
   document.getElementById('sN').value=d?.s?.nm||'';document.getElementById('sP').value=d?.s?.ph||(d?'':'010-');
   sAddr('s',d?.s);document.getElementById('sA').value=d?.s?.dt||'';
-  document.getElementById('rN').value=d?.r?.nm||'';document.getElementById('rP').value=d?.r?.ph||(d?'':'010-');
-  sAddr('r',d?.r);document.getElementById('rA').value=d?.r?.dt||'';
-  document.getElementById('rNo').value=d?.r?.no||'';
+  // 받는 사람 초기화
+  recvCount=0;
+  document.getElementById('recvList').innerHTML='';
+  if(d?.r){
+    addRecv({nm:d.r.nm,ph:d.r.ph,pv:d.r.pv,ci:d.r.ci,su:d.r.su,dt:d.r.dt,_amt:d.amt||'',no:d.r.no});
+  }else{
+    addRecv();
+  }
   // 터치패드 닫기
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
-  ['sP','rP'].forEach(id=>document.getElementById(id).setAttribute('readonly',''));
+  document.getElementById('sP').setAttribute('readonly','');
   sm('mForm');
 }
 function sAddr(p,d){
@@ -626,16 +715,42 @@ function saveO(){
   if(!curCat)return toast('상품 구분(배/배즙)을 선택해주세요');
   const va=document.getElementById('fV').value,qt=document.getElementById('fQ').value;
   const sn=document.getElementById('sN').value.trim(),sp=document.getElementById('sP').value.trim();
-  const rn=document.getElementById('rN').value.trim(),rp=document.getElementById('rP').value.trim(),rd=document.getElementById('rD').value;
-  const amt=document.getElementById('fAmt').value.trim();
   if(!va)return toast('품종을 선택해주세요');if(!qt)return toast('과수를 선택해주세요');
-  if(!amt)return toast('수량을 입력해주세요');
   if(!sn)return toast('보내는 분 성명 입력');if(!sp)return toast('보내는 분 연락처 입력');
-  if(!rn)return toast('받는 분 성명 입력');if(!rp)return toast('받는 분 연락처 입력');if(!rd)return toast('받는 분 주소(도) 선택');
-  const dt={cat:curCat,va,qt,amt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
-    r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
-  if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1){Object.assign(O[i],dt);sheetUpdate(O[i])}toast('수정 완료')}
-  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);const now=new Date();dt.ca=now.getFullYear()+'-'+Z(now.getMonth()+1)+'-'+Z(now.getDate())+'T'+Z(now.getHours())+':'+Z(now.getMinutes());dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
+  const sender={nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()};
+  const recvs=getRecvCards();
+  if(!recvs.length)return toast('받는 사람을 추가해주세요');
+  // 받는 사람 검증
+  for(let i=0;i<recvs.length;i++){
+    const r=recvs[i];
+    if(!r.nm)return toast(`받는 사람 ${i+1}: 성명을 입력해주세요`);
+    if(!r.ph||r.ph==='010-')return toast(`받는 사람 ${i+1}: 연락처를 입력해주세요`);
+    if(!r.pv)return toast(`받는 사람 ${i+1}: 주소(도)를 선택해주세요`);
+    if(!r._amt)return toast(`받는 사람 ${i+1}: 받는 수량을 입력해주세요`);
+  }
+  const now=new Date();
+  const ca=now.getFullYear()+'-'+Z(now.getMonth()+1)+'-'+Z(now.getDate())+'T'+Z(now.getHours())+':'+Z(now.getMinutes());
+  if(EI){
+    // 수정: 첫 번째 받는 사람만 반영
+    const r=recvs[0];
+    const i=O.findIndex(o=>o.id===EI);
+    if(i>-1){
+      Object.assign(O[i],{cat:curCat,va,qt,amt:r._amt,s:sender,r:{nm:r.nm,ph:r.ph,pv:r.pv,ci:r.ci,su:r.su,dt:r.dt,no:r.no}});
+      if(O[i].st==='접수완료')O[i].st='재발송';
+      sheetUpdate(O[i]);
+    }
+    toast(O[i]?.st==='재발송'?'수정 완료 — 재발송 필요':'수정 완료');
+  }else{
+    // 신규: 받는 사람 수만큼 주문 생성
+    recvs.forEach(r=>{
+      const dt={cat:curCat,va,qt,amt:r._amt,s:{...sender},
+        r:{nm:r.nm,ph:r.ph,pv:r.pv,ci:r.ci,su:r.su,dt:r.dt,no:r.no},
+        id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2,4),
+        ca,st:'접수'};
+      O.push(dt);sheetAdd(dt);
+    });
+    toast(`${recvs.length}건 등록 완료`);
+  }
   sv();render();cm('mForm');EI=null;
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
@@ -651,29 +766,61 @@ function closePhView(){
   document.body.style.overflow='';
 }
 let phEditId=null;
+let peNewPhoto=''; // 새로 선택한 사진 base64
 function edPhoto(id){
   const o=O.find(x=>x.id===id);if(!o)return;
-  phEditId=id;
+  phEditId=id;peNewPhoto='';
   document.getElementById('phEditImg').innerHTML=o.img?`<img src="${o.img}" alt="주문서 사진" style="max-height:240px">`:'<p style="padding:20px;text-align:center;color:var(--tl)">사진 없음</p>';
   document.getElementById('peN').value=o.s.nm||'';
   document.getElementById('peP').value=o.s.ph||'010-';
   document.getElementById('peQt').value=o.qt&&o.qt!=='-'?o.qt:'';
   document.getElementById('peNo').value=o.r.no||'';
+  document.getElementById('pePhotoIn').value='';
+  document.getElementById('peGalleryIn').value='';
   document.querySelectorAll('.numpad.show').forEach(p=>p.classList.remove('show'));
   sm('mPhEdit');
 }
-function savePhEdit(){
+function pePhotoChanged(e){
+  const f=e.target.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    peNewPhoto=ev.target.result;
+    document.getElementById('phEditImg').innerHTML=`<img src="${peNewPhoto}" alt="새 사진" style="max-height:240px">`;
+    toast('새 사진이 선택되었습니다');
+  };reader.readAsDataURL(f);
+}
+async function savePhEdit(){
   const nm=document.getElementById('peN').value.trim();
   const ph=document.getElementById('peP').value.trim();
   if(!nm)return toast('보내는 분 성명을 입력해주세요');
   if(!ph||ph==='010-')return toast('보내는 분 연락처를 입력해주세요');
   const idx=O.findIndex(o=>o.id===phEditId);if(idx<0)return;
+  
+  // 새 사진이 있으면 드라이브에 업로드
+  if(peNewPhoto){
+    const u=getSheetUrl();
+    if(u){
+      toast('새 사진 업로드 중...');
+      try{
+        const parts=peNewPhoto.split(',');
+        const mimeType=parts[0].match(/:(.*?);/)?.[1]||'image/jpeg';
+        const base64=parts[1];
+        const r=await fetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},
+          body:JSON.stringify({action:'uploadPhoto',id:phEditId,base64,mimeType})});
+        const data=await r.json();
+        if(data.ok&&data.url){O[idx].img=data.url}
+        else{O[idx].img=peNewPhoto} // 업로드 실패 시 로컬 저장
+      }catch(err){O[idx].img=peNewPhoto}
+    }else{O[idx].img=peNewPhoto}
+  }
+  
   O[idx].s.nm=nm;
   O[idx].s.ph=ph;
   O[idx].qt=document.getElementById('peQt').value.trim()||'-';
   O[idx].r.no=document.getElementById('peNo').value.trim();
+  if(O[idx].st==='접수완료')O[idx].st='재발송';
   sv();render();sheetUpdate(O[idx]);
-  cm('mPhEdit');toast('수정 완료');
+  cm('mPhEdit');toast(O[idx].st==='재발송'?'수정 완료 — 재발송 필요':'수정 완료');peNewPhoto='';
 }
 function dlO(id){if(!confirm('삭제하시겠습니까?'))return;O=O.filter(o=>o.id!==id);CK.delete(id);sv();render();sheetDelete(id);toast('삭제 완료')}
 function bulkDelete(){
