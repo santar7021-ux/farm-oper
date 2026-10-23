@@ -559,15 +559,24 @@ function rList(){
 
 function Z(n){return String(n).padStart(2,'0')}
 function safeDate(v){
-  if(!v)return null;
-  const d=new Date(v);
+  if(!v||v==='-')return null;
+  // 문자열 정리
+  let s=String(v).trim();
+  // "2026-10-20T04:43" 또는 "2026-10-20T04:43:08.897Z" 형태
+  if(s.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)){
+    const d=new Date(s);
+    return isNaN(d.getTime())?null:d;
+  }
+  const d=new Date(s);
   return isNaN(d.getTime())?null:d;
 }
 function fmtDate(v,full){
   const d=safeDate(v);
   if(!d)return '-';
-  if(full)return d.getFullYear().toString().slice(2)+'.'+Z(d.getMonth()+1)+'.'+Z(d.getDate())+' '+Z(d.getHours())+':'+Z(d.getMinutes());
-  return (d.getMonth()+1)+'/'+d.getDate()+' '+Z(d.getHours())+':'+Z(d.getMinutes());
+  const y=d.getFullYear().toString().slice(2);
+  const mo=Z(d.getMonth()+1),da=Z(d.getDate()),ho=Z(d.getHours()),mi=Z(d.getMinutes());
+  if(full)return y+'.'+mo+'.'+da+' '+ho+':'+mi;
+  return mo+'/'+da+' '+ho+':'+mi;
 }
 function togGrp(k){openGrps.has(k)?openGrps.delete(k):openGrps.add(k);rList()}
 function togGrpCk(k,checked){
@@ -626,7 +635,7 @@ function saveO(){
   const dt={cat:curCat,va,qt,amt,s:{nm:sn,ph:sp,pv:document.getElementById('sD').value,ci:document.getElementById('sC').value,su:document.getElementById('sG').value,dt:document.getElementById('sA').value.trim()},
     r:{nm:rn,ph:rp,pv:rd,ci:document.getElementById('rC').value,su:document.getElementById('rG').value,dt:document.getElementById('rA').value.trim(),no:document.getElementById('rNo').value.trim()}};
   if(EI){const i=O.findIndex(o=>o.id===EI);if(i>-1){Object.assign(O[i],dt);sheetUpdate(O[i])}toast('수정 완료')}
-  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);dt.ca=new Date().toISOString();dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
+  else{dt.id=crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);const now=new Date();dt.ca=now.getFullYear()+'-'+Z(now.getMonth()+1)+'-'+Z(now.getDate())+'T'+Z(now.getHours())+':'+Z(now.getMinutes());dt.st='접수';O.push(dt);sheetAdd(dt);toast('등록 완료')}
   sv();render();cm('mForm');EI=null;
 }
 function edO(id){const o=O.find(x=>x.id===id);if(o)openForm(o)}
@@ -824,7 +833,7 @@ async function camSave(){
     r:{nm:'-',ph:'-',pv:'',ci:'',su:'',dt:'',no:memo},
     img:imgUrl,
     id:orderId,
-    ca:new Date().toISOString(),
+    ca:(()=>{const n=new Date();return n.getFullYear()+'-'+Z(n.getMonth()+1)+'-'+Z(n.getDate())+'T'+Z(n.getHours())+':'+Z(n.getMinutes())})(),
     st:'접수'
   };
   O.push(dt);sv();render();
